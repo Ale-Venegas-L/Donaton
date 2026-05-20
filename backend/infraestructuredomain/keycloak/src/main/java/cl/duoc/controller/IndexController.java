@@ -12,6 +12,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -41,8 +43,15 @@ public class IndexController {
             Jwk jwk = jwtService.getJwk();
             Algorithm algorithm = Algorithm.RSA256((RSAPublicKey) jwk.getPublicKey(), null);
             algorithm.verify(jwt);
+            var realmAccess = jwt.getClaim("realm_access");
+            if (realmAccess == null || realmAccess.isNull()) {
+                throw new Exception("Token does not contain realm_access claim");
+            }
             @SuppressWarnings("unchecked")
-            List<String> roles = (List<String>) jwt.getClaim("realm_access").asMap().get("roles");
+            List<String> roles = (List<String>) realmAccess.asMap().get("roles");
+            if (roles == null || roles.isEmpty()) {
+                throw new Exception("Token does not contain roles in realm_access");
+            }
             Date expiryDate = jwt.getExpiresAt();
             if (expiryDate.before(new Date())) {
                 throw new Exception("Token ha expirado");
@@ -71,8 +80,10 @@ public class IndexController {
         }
     }
 
-    @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> login(String username, String password) {
+    @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> login(@RequestBody java.util.Map<String, String> credentials) {
+        String username = credentials.get("username");
+        String password = credentials.get("password");
         String login = restService.login(username, password);
        return ResponseEntity.ok(login);
     }
@@ -98,4 +109,21 @@ public class IndexController {
             throw new BusinessRuleException("refresh", "False",HttpStatus.FORBIDDEN);   
         }
     }  
+
+    @PostMapping(value = "/register", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> register(@RequestBody java.util.Map<String, String> body) {
+        String username = body.get("username");
+        String password = body.get("password");
+        String email = body.get("email");
+        if (username == null || password == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Username and password are required"));
+        }
+        try {
+            restService.registerUser(username, password, email);
+            return ResponseEntity.ok(Map.of("message", "User registered successfully"));
+        } catch (Exception e) {
+            logger.error("unable to register, exception : {} ", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "Registration failed: " + e.getMessage()));
+        }
+    }
 }

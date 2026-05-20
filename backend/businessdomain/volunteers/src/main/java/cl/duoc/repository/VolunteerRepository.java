@@ -25,6 +25,9 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, Long> {
     @Query("SELECT v FROM Volunteer v WHERE v.nombre LIKE %:search% OR v.apellido LIKE %:search% OR v.email LIKE %:search%")
     List<Volunteer> findByAnyFieldContaining(@Param("search") String search);
     
-    @Query("SELECT COUNT(v) FROM Volunteer v WHERE v.id = :volunteerId AND :campaignId MEMBER OF v.campaigns")
+    @Query("SELECT CASE WHEN COUNT(v) > 0 THEN true ELSE false END FROM Volunteer v WHERE v.id = :volunteerId AND :campaignId MEMBER OF v.campaigns")
     boolean isVolunteerInCampaign(@Param("volunteerId") Long volunteerId, @Param("campaignId") Long campaignId);
+
+    @Query("SELECT v FROM Volunteer v JOIN v.campaigns c WHERE c.id = :campaignId")
+    List<Volunteer> findByCampaignId(@Param("campaignId") Long campaignId);
 }

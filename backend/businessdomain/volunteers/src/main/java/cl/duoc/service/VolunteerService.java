@@ -156,9 +156,6 @@ public class VolunteerService {
         if (campaignId == null) {
             throw new IllegalArgumentException("Campaign ID cannot be null");
         }
-        return volunteerRepository.findAll().stream()
-                .filter(v -> v.getCampaigns() != null && 
-                        v.getCampaigns().stream().anyMatch(c -> c.getId().equals(campaignId)))
-                .toList();
+        return volunteerRepository.findByCampaignId(campaignId);
     }
 }

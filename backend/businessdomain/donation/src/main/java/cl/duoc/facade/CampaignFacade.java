@@ -14,7 +14,7 @@ public class CampaignFacade {
     @Autowired
     private WebClient.Builder webClientBuilder;
 
-    private static final String CAMPAIGN_SERVICE_URL = "http://campaign/api/campaigns";
+    private static final String CAMPAIGN_SERVICE_URL = "http://campaign:8081/campaigns";
 
     public Optional<CampaignModel> getCampaignById(Long campaignId) {
         try {

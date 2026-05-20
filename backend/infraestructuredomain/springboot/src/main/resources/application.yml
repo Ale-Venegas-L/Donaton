@@ -8,13 +8,3 @@ logging:
   level:
     org.springframework.cloud.gateway: DEBUG
     reactor.netty.http.client: DEBUG
-spring:
-  cloud:
-    gateway:
-      routes:
-        - id: springboot
-          uri: lb://springboot
-          predicates:
-            - Path=/api/springboot/**
-          filters:
-            - StripPrefix=2

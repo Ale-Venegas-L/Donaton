@@ -8,7 +8,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotNull;
@@ -17,7 +18,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 
 @Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@Table(name = "donation")
+@Inheritance(strategy = InheritanceType.JOINED)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = MonetaryDonation.class, name = "MONETARY"),
@@ -31,8 +33,11 @@ public abstract class Donation {
     private Long id;
     
     @NotNull(message = "La campaña es obligatoria")
-    @ManyToOne
-    @JoinColumn(name = "campaign_id", nullable = false)
+    @Column(name = "campaign_id", nullable = false)
+    @Schema(description = "ID de la campaña asociada a la donación", requiredMode = Schema.RequiredMode.REQUIRED)
+    private Long campaignId;
+    
+    @Transient
     @Schema(description = "Campaña asociada a la donación", requiredMode = Schema.RequiredMode.REQUIRED)
     private CampaignModel campaign;
     
@@ -54,6 +59,7 @@ public abstract class Donation {
     }
     
     public Donation(CampaignModel campaign, String donorName, String description) {
+        this.campaignId = campaign.getId();
         this.campaign = campaign;
         this.donorName = donorName;
         this.description = description;
@@ -71,12 +77,23 @@ public abstract class Donation {
         this.id = id;
     }
     
+    public Long getCampaignId() {
+        return campaignId;
+    }
+    
+    public void setCampaignId(Long campaignId) {
+        this.campaignId = campaignId;
+    }
+    
     public CampaignModel getCampaign() {
         return campaign;
     }
     
     public void setCampaign(CampaignModel campaign) {
         this.campaign = campaign;
+        if (campaign != null) {
+            this.campaignId = campaign.getId();
+        }
     }
     
     public String getDonorName() {

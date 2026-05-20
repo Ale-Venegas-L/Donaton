@@ -1,8 +1,10 @@
 package cl.duoc.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name = "object_donation")
 public class ObjectDonation extends Donation {
     private String objectName;
     private String category;

@@ -1,8 +1,10 @@
 package cl.duoc.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name = "monetary_donation")
 public class MonetaryDonation extends Donation {
     private double amount;
     private String currency;

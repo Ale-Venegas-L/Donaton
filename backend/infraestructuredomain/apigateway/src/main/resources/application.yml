@@ -1,5 +1,47 @@
 server:
   port: 8084
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:5173"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+            maxAge: 3600
+      routes:
+        - id: auth
+          uri: lb://keycloak
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=2
+        - id: campaign
+          uri: lb://campaign
+          predicates:
+            - Path=/api/campaigns/**
+          filters:
+            - StripPrefix=1
+        - id: donation
+          uri: lb://donation
+          predicates:
+            - Path=/api/donation/**
+          filters:
+            - StripPrefix=1
+        - id: volunteers
+          uri: lb://volunteers
+          predicates:
+            - Path=/api/volunteers/**
+          filters:
+            - StripPrefix=1
 eureka:
   client:
     serviceUrl:
@@ -8,19 +50,3 @@ logging:
   level:
     org.springframework.cloud.gateway: DEBUG
     reactor.netty.http.client: DEBUG
-spring:
-  cloud:
-    gateway:
-      routes:
-        - id: campaign
-          uri: lb://campaign
-          predicates:
-            - Path=/api/campaigns/**
-        - id: donation
-          uri: lb://donation
-          predicates:
-            - Path=/donation/**
-        - id: volunteers
-          uri: lb://volunteers
-          predicates:
-            - Path=/api/volunteers/**

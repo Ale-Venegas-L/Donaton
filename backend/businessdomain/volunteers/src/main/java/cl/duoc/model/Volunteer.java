@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -20,7 +21,7 @@ import java.util.Set;
 public class Volunteer {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Schema(description = "Unique identifier for the volunteer", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
     private Long id;
     
@@ -56,14 +57,14 @@ public class Volunteer {
     @Schema(description = "Registration date of the volunteer", accessMode = Schema.AccessMode.READ_ONLY)
     private LocalDateTime fechaRegistro;
     
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "volunteer_campaigns",
         joinColumns = @JoinColumn(name = "volunteer_id"),
         inverseJoinColumns = @JoinColumn(name = "campaign_id")
     )
     @Schema(description = "Campaigns in which the volunteer participates")
-    private Set<CampaignModel> campaigns;
+    private Set<CampaignModel> campaigns = new HashSet<>();
     
     @PrePersist
     protected void onCreate() {

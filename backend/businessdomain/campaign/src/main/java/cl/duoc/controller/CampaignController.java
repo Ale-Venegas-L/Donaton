@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/campaigns")
+@RequestMapping("/campaigns")
 public class CampaignController {
 
     @Autowired
@@ -40,6 +40,18 @@ public class CampaignController {
     public ResponseEntity<List<CampaignModel>> getAllCampaigns() {
         List<CampaignModel> campaigns = campaignService.getAllCampaigns();
         return ResponseEntity.ok(campaigns);
+    }
+
+    @Operation(summary = "Contar campañas")
+    @GetMapping("/count")
+    public ResponseEntity<Integer> getCampaignCount() {
+        return ResponseEntity.ok(campaignService.getAllCampaigns().size());
+    }
+
+    @Operation(summary = "Contar campañas activas")
+    @GetMapping("/active/count")
+    public ResponseEntity<Integer> getActiveCampaignCount() {
+        return ResponseEntity.ok(campaignService.getCampaignsByStatus(CampaignStatus.ACTIVE).size());
     }
 
     @Operation(summary = "Obtener campaña por ID")

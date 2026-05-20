@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ApiExceptionHandler {
     @ExceptionHandler(UnknownHostException.class)
     public ResponseEntity<StandardAPIException> handleUnknownHostException(UnknownHostException ex) {
-        StandardAPIException response = new StandardAPIException("Error de conexion","erorr-1024",ex.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.PARTIAL_CONTENT);
+        StandardAPIException response = new StandardAPIException("Error de conexion","error-1024",ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.SERVICE_UNAVAILABLE);
     }
     
      @ExceptionHandler(BusinessRuleException.class)

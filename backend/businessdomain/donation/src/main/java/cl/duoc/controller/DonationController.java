@@ -16,14 +16,11 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import cl.duoc.repo.DonationRepo;
 import cl.duoc.model.Donation;
-import cl.duoc.model.DonationFactory;
-import cl.duoc.model.DonationFactory.DonationType;
 import cl.duoc.model.CampaignModel;
 import cl.duoc.dto.DonationRequest;
 import cl.duoc.dto.DonationUpdateRequest;
-import cl.duoc.facade.CampaignFacade;
+import cl.duoc.service.DonationService;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
@@ -34,10 +31,7 @@ import java.util.Optional;
 public class DonationController {
 
     @Autowired
-    private DonationRepo donationRepo;
-
-    @Autowired
-    private CampaignFacade campaignFacade;
+    private DonationService donationService;
 
     @Operation(summary = "Obtener todas las donaciones", description = "Devuelve una lista de todas las donaciones")
     @ApiResponses(value = {
@@ -46,11 +40,29 @@ public class DonationController {
     })
     @GetMapping
     public ResponseEntity<List<Donation>> list() {
-        List<Donation> findAll = donationRepo.findAll();
+        List<Donation> findAll = donationService.listAllDonations();
         if (findAll.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(findAll);
+    }
+
+    @Operation(summary = "Contar donaciones")
+    @GetMapping("/count")
+    public ResponseEntity<Integer> getDonationCount() {
+        return ResponseEntity.ok(donationService.listAllDonations().size());
+    }
+
+    @Operation(summary = "Contar donadores únicos")
+    @GetMapping("/donors/count")
+    public ResponseEntity<Integer> getDonorCount() {
+        List<Donation> donations = donationService.listAllDonations();
+        long uniqueDonors = donations.stream()
+            .map(Donation::getDonorName)
+            .filter(name -> name != null && !name.isEmpty())
+            .distinct()
+            .count();
+        return ResponseEntity.ok((int) uniqueDonors);
     }
 
     @Operation(summary = "Obtener donación por ID", description = "Devuelve una donación específica por su ID")
@@ -62,15 +74,9 @@ public class DonationController {
     @GetMapping("/{id}")
     @CircuitBreaker(name = "donation", fallbackMethod = "getDonationFallback")
     public ResponseEntity<Donation> get(@Parameter(description = "ID of the donation to retrieve") @PathVariable("id") Long id) {
-        if (id == null) {
-            throw new IllegalArgumentException("Donation ID cannot be null");
-        }
-        Optional<Donation> optionalDonation = donationRepo.findById(id);
-        if (optionalDonation.isPresent()) {
-            Donation donation = optionalDonation.get();            
-            return ResponseEntity.ok(donation);
-        }else
-        return ResponseEntity.notFound().build();
+        Optional<Donation> optionalDonation = donationService.findDonationById(id);
+        return optionalDonation.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
     
     public ResponseEntity<Donation> getDonationFallback(Long id, Throwable ex) {
@@ -100,65 +106,10 @@ public class DonationController {
     @PostMapping
     public ResponseEntity<Donation> create(@Parameter(description = "Información de la donación") @Valid @RequestBody DonationRequest request) {
         try {
-            // Validar que la campaña existe y puede recibir donaciones
-            if (!campaignFacade.campaignExists(request.getCampaignId())) {
-                return ResponseEntity.badRequest().build();
-            }
-            
-            if (!campaignFacade.canReceiveDonations(request.getCampaignId())) {
-                return ResponseEntity.badRequest().build();
-            }
-            
-            // Obtener la campaña
-            Optional<CampaignModel> campaignOpt = campaignFacade.getCampaignById(request.getCampaignId());
-            if (campaignOpt.isEmpty()) {
-                return ResponseEntity.badRequest().build();
-            }
-            
-            Donation donation = createDonationFromRequest(request, campaignOpt.get());
-            if (donation == null) {
-                return ResponseEntity.badRequest().build();
-            }
-            Donation savedDonation = donationRepo.save(donation);
+            Donation savedDonation = donationService.createDonation(request);
             return ResponseEntity.status(201).body(savedDonation);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
-        }
-    }
-    
-    private Donation createDonationFromRequest(DonationRequest request, CampaignModel campaign) {
-        DonationType type = DonationType.valueOf(request.getType().toUpperCase());
-        
-        switch (type) {
-            case MONETARY:
-                if (request.getAmount() == null || request.getCurrency() == null) {
-                    throw new IllegalArgumentException("Monetary donations require amount and currency");
-                }
-                return DonationFactory.createMonetaryDonation(
-                    campaign,
-                    request.getDonorName(), 
-                    request.getDescription(), 
-                    request.getAmount(), 
-                    request.getCurrency()
-                );
-                
-            case OBJECT:
-                if (request.getObjectName() == null || request.getCategory() == null || 
-                    request.getEstimatedValue() == null || request.getQuantity() == null) {
-                    throw new IllegalArgumentException("Object donations require objectName, category, estimatedValue, and quantity");
-                }
-                return DonationFactory.createObjectDonation(
-                    campaign,
-                    request.getDonorName(), 
-                    request.getDescription(), 
-                    request.getObjectName(), 
-                    request.getCategory(), 
-                    request.getEstimatedValue(), 
-                    request.getQuantity()
-                );
-                
-            default:
-                throw new IllegalArgumentException("Unsupported donation type: " + type);
         }
     }
 
@@ -172,18 +123,15 @@ public class DonationController {
     public ResponseEntity<Donation> update(
             @Parameter(description = "ID de la donación a actualizar") @PathVariable("id") Long id, 
             @Parameter(description = "Información actualizada de la donación") @Valid @RequestBody DonationUpdateRequest request) {
-        if (id == null) {
-            throw new IllegalArgumentException("Donation ID cannot be null");
+        try {
+            Donation updatedDonation = donationService.updateDonation(id, request);
+            if (updatedDonation != null) {
+                return ResponseEntity.ok(updatedDonation);
+            }
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         }
-        Optional<Donation> optionalDonation = donationRepo.findById(id);
-        if (optionalDonation.isPresent()) {
-            Donation donationToUpdate = optionalDonation.get();
-            donationToUpdate.setDonorName(request.getDonorName());
-            donationToUpdate.setDescription(request.getDescription());
-            donationRepo.save(donationToUpdate);
-            return ResponseEntity.ok(donationToUpdate);
-        }
-        return ResponseEntity.notFound().build();
     }
     
     @Operation(summary = "Eliminar donación", description = "Elimina una donación por su ID")
@@ -193,15 +141,15 @@ public class DonationController {
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@Parameter(description = "ID de la donación a eliminar") @PathVariable("id") Long id) {
-        if (id == null) {
-            throw new IllegalArgumentException("Donation ID cannot be null");
+        try {
+            boolean deleted = donationService.deleteDonation(id);
+            if (!deleted) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         }
-        Optional<Donation> donation = donationRepo.findById(id);
-        if (donation.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        donationRepo.deleteById(id);
-        return ResponseEntity.noContent().build();
     }
     
 }

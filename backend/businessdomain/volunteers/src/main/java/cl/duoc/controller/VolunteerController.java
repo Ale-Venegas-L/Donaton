@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/api/volunteers")
+@RequestMapping("/volunteers")
 @Tag(name = "Volunteer API", description = "API para gestión de voluntarios")
 public class VolunteerController {
 
@@ -62,6 +62,12 @@ public class VolunteerController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(volunteers);
+    }
+
+    @Operation(summary = "Contar voluntarios")
+    @GetMapping("/count")
+    public ResponseEntity<Integer> getVolunteerCount() {
+        return ResponseEntity.ok(volunteerService.getAllVolunteers().size());
     }
 
     @Operation(summary = "Obtener voluntario por ID", description = "Devuelve un voluntario específico por su ID")
@@ -160,14 +166,14 @@ public class VolunteerController {
 
     @Operation(summary = "Eliminar voluntario", description = "Elimina un voluntario del sistema")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Voluntario eliminado exitosamente"),
+        @ApiResponse(responseCode = "204", description = "Voluntario eliminado exitosamente"),
         @ApiResponse(responseCode = "404", description = "Voluntario no encontrado")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteVolunteer(@Parameter(description = "ID del voluntario a eliminar") @PathVariable Long id) {
         boolean deleted = volunteerService.deleteVolunteer(id);
         if (deleted) {
-            return ResponseEntity.ok().build();
+            return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
     }
