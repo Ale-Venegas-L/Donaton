@@ -115,11 +115,13 @@ public class IndexController {
         String username = body.get("username");
         String password = body.get("password");
         String email = body.get("email");
+        String firstName = body.get("firstName");
+        String lastName = body.get("lastName");
         if (username == null || password == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Username and password are required"));
         }
         try {
-            restService.registerUser(username, password, email);
+            restService.registerUser(username, password, email, firstName, lastName);
             return ResponseEntity.ok(Map.of("message", "User registered successfully"));
         } catch (Exception e) {
             logger.error("unable to register, exception : {} ", e.getMessage());

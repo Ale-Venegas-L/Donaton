@@ -113,7 +113,7 @@ public class KeycloakRestService {
         return restTemplate.postForObject(adminTokenUri, request, String.class);
     }
 
-    public void registerUser(String username, String password, String email) {
+    public void registerUser(String username, String password, String email, String firstName, String lastName) {
         String tokenResponse = getAdminToken();
         try {
             @SuppressWarnings("unchecked")
@@ -126,7 +126,11 @@ public class KeycloakRestService {
             Map<String, Object> user = new HashMap<>();
             user.put("username", username);
             user.put("email", email);
+            user.put("firstName", firstName != null ? firstName : username);
+            user.put("lastName", lastName != null ? lastName : username);
             user.put("enabled", true);
+            user.put("emailVerified", true);
+            user.put("requiredActions", List.of());
 
             Map<String, Object> credential = new HashMap<>();
             credential.put("type", "password");

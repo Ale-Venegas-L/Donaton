@@ -7,6 +7,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123}
     volumes:
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
       - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
       - mysql-data:/var/lib/mysql
     healthcheck:
@@ -154,14 +155,10 @@ services:
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
+      JAVA_OPTS: "-XX:MaxRAMPercentage=40"
       KC_JAVA_OPTS: "-Xms256m -Xmx512m -XX:MetaspaceSize=96m -XX:MaxMetaspaceSize=128m"
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-
 volumes:
   mysql-data:
 

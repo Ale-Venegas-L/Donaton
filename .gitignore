@@ -94,6 +94,7 @@ build/
 coverage/
 Desktop.ini
 dist/
+keycloak/*
 ehthumbs.db
 firebase-debug.log
 firestore-debug.log

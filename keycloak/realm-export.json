@@ -1,18 +1,72 @@
 {
   "realm": "Donaton",
-  "auth-server-url": "http://localhost:8091/",
-  "ssl-required": "none",
-  "resource": "front-client-app",
-  "credentials": {
-    "secret": "qwerty"
+  "displayName": "Donaton Platform",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": false,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": false,
+  "editUsernameAllowed": false,
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Admin",
+      "lastName": "User",
+      "email": "admin@donaton.cl",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["admin"]
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "admin",
+        "description": "Administrator role"
+      },
+      {
+        "name": "user",
+        "description": "Regular user role"
+      }
+    ]
   },
-  "confidential-port": 0,
-  "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJicXFFbUs1N25GeU1DeVpzVzQ0N184el96XzhZUkw4ckJCTV95MGdKei0wIn0.eyJleHAiOjE3NzkyNDUyNjIsImlhdCI6MTc3OTI0MTY2MiwianRpIjoiY2MzM2RmYjktMTZhYy00OTc4LWJmNjEtZGM5ZmRhYmQ1MzAxIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDkxL3JlYWxtcy9Eb25hdG9uIiwic3ViIjoiMzAyMGVhMzEtZmVjNy00Y2UwLWFlNmEtMmQxMGI3Yjc1ODlmIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZnJvbnQtY2xpZW50LWFwcCIsInNpZCI6ImJiMmE1MTRjLTkzNjYtNGZlYi1iYzhmLWJkZDhiNTI2MWQzNSIsImFjciI6IjEiLCJhbGxvd2VkLW9yaWdpbnMiOlsiaHR0cDovL2xvY2FsaG9zdDo1MTczIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJhZG1pbiIsIkFkbWluIl19LCJzY29wZSI6InByb2ZpbGUgZW1haWwiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwibmFtZSI6IkFkbWluIFVzZXIiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhZG1pbiIsImdpdmVuX25hbWUiOiJBZG1pbiIsImZhbWlseV9uYW1lIjoiVXNlciIsImVtYWlsIjoiYWRtaW5AZG9uYXRvbi5jbCJ9.sLbMBn59HQ4tDGgYVMHRrKOX6Tyh46BMYaEosPjiKPWDsgz1NBBerHMbmHwIdUfdj5jiWJqtrlqOUTcTzKVwtlI-uTNuJ9JGLQn74TkuuoyMcBlyWh7NPxUZ5irfAVmLKBq96kdB7f8iS22f9CmWLvAcSafNzYrND4c64_tQpgEogAlO_b_48kK0wUvHGTFrz5X8Vtt9LEIB-qMyvKXx4qbV1wbLYpI1FRp9XKH2fjcckvtIpcOMsxu3UucIm01zx8TEO_DOlSKQ22mBEMDWWP6wgn3rxPmPQObMXl4OHdq99Xftgsl3ALZVc6HiqGJarR4TkSltVotOJIDiId3Cbw",
-  "expires_in": 3600,
-  "refresh_expires_in": 1800,
-  "refresh_token": "eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI0Y2IzMmIxMS0wOTJiLTRjYTUtOTM4Ni03ZDJjMWM2ZWE3YWIifQ.eyJleHAiOjE3NzkyNDM0NjIsImlhdCI6MTc3OTI0MTY2MiwianRpIjoiNzdlMmNkY2QtNjZjZi00YTNmLTlhOGUtMWNkNGM2NDFhNzBiIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDkxL3JlYWxtcy9Eb25hdG9uIiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDo4MDkxL3JlYWxtcy9Eb25hdG9uIiwic3ViIjoiMzAyMGVhMzEtZmVjNy00Y2UwLWFlNmEtMmQxMGI3Yjc1ODlmIiwidHlwIjoiUmVmcmVzaCIsImF6cCI6ImZyb250LWNsaWVudC1hcHAiLCJzaWQiOiJiYjJhNTE0Yy05MzY2LTRmZWItYmM4Zi1iZGQ4YjUyNjFkMzUiLCJzY29wZSI6IndlYi1vcmlnaW5zIHJvbGVzIHByb2ZpbGUgYmFzaWMgZW1haWwgYWNyIn0.mbmgiFQTV-V6i6W3ys_Y6_FRtKWjf_zZXnaxesT5gFle9hzyapjm_mKoNcsMkRpUIP6f4aFYuBCbsJjkK0EwIg",
-  "token_type": "Bearer",
-  "not-before-policy": 0,
-  "session_state": "bb2a514c-9366-4feb-bc8f-bdd8b5261d35",
-  "scope": "profile email"
+  "clients": [
+    {
+      "clientId": "front-client-app",
+      "name": "Frontend Application",
+      "description": "Frontend client for Donaton",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "qwerty",
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "redirectUris": ["http://localhost:5173/*"],
+      "webOrigins": ["http://localhost:5173"],
+      "attributes": {
+        "access.token.lifespan": "3600"
+      }
+    },
+    {
+      "clientId": "admin-cli",
+      "name": "Admin CLI",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "admin-cli-secret",
+      "protocol": "openid-connect",
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false
+    }
+  ]
 }
