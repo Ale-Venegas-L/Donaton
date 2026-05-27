@@ -1,5 +1,5 @@
-import { Link } from 'react-router';
-import { useAuth } from '../hooks/useAuth.jsx';
+import { Link } from 'react-router'
+import { useAuth } from '../hooks/useAuth.jsx'
 
 export function QuickActions() {
   const { user } = useAuth()
@@ -7,8 +7,8 @@ export function QuickActions() {
   const actions = [
     { to: '/donations', label: 'Nueva Donación', icon: '💝' },
     { to: '/campaigns', label: 'Crear Campaña', icon: '📢' },
-    ...(canViewVolunteers ? [{ to: '/volunteers', label: 'Registrar Voluntario', icon: '🙋' }] : []),
-  ];
+    ...(canViewVolunteers ? [{ to: '/volunteers', label: 'Registrar Voluntario', icon: '🙋' }] : [])
+  ]
 
   return (
     <div className="card shadow-sm">
@@ -26,7 +26,7 @@ export function QuickActions() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default QuickActions;
+export default QuickActions

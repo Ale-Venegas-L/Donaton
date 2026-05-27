@@ -35,7 +35,10 @@ export function AuthProvider({ children }) {
   }, [])
 
   useEffect(() => {
-    checkAuth()
+    const initAuth = async () => {
+      await checkAuth()
+    }
+    initAuth()
   }, [checkAuth])
 
   const login = async (username, password) => {

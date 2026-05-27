@@ -1,34 +1,34 @@
-import { useState, useEffect } from 'react';
-import { donations } from '../services/api';
-import { formatDateLong, formatCurrency } from '../utils/format';
+import { useState, useEffect } from 'react'
+import { donations } from '../services/api'
+import { formatDateLong, formatCurrency } from '../utils/format'
 
 export function RecentDonations() {
-  const [recentDonations, setRecentDonations] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [recentDonations, setRecentDonations] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    let cancelled = false;
+    let cancelled = false
     const fetchDonations = async () => {
       try {
-        const res = await donations.list();
-        if (cancelled) return;
-        setRecentDonations(res.data.slice(0, 5));
+        const res = await donations.list()
+        if (cancelled) return
+        setRecentDonations(res.data.slice(0, 5))
       } catch (e) {
-        if (cancelled) return;
-        setError(e);
-        console.error('Error loading recent donations:', e);
+        if (cancelled) return
+        setError(e)
+        console.error('Error loading recent donations:', e)
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setLoading(false)
       }
-    };
-    fetchDonations();
-    return () => { cancelled = true; };
-  }, []);
+    }
+    fetchDonations()
+    return () => { cancelled = true }
+  }, [])
 
-  if (loading) return <div className="text-center py-3 text-muted">Cargando donaciones...</div>;
+  if (loading) return <div className="text-center py-3 text-muted">Cargando donaciones...</div>
 
-  if (error) return <div className="text-center py-3 text-danger">Error al cargar donaciones</div>;
+  if (error) return <div className="text-center py-3 text-danger">Error al cargar donaciones</div>
 
   return (
     <div className="card shadow-sm">
@@ -70,7 +70,7 @@ export function RecentDonations() {
         )}
       </div>
     </div>
-  );
+  )
 }
 
-export default RecentDonations;
+export default RecentDonations

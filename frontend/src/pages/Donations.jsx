@@ -1,17 +1,17 @@
-import { useState, useEffect } from 'react';
-import { donations, campaigns } from '../services/api';
-import { formatDate, formatDonationAmount } from '../utils/format';
+import { useState, useEffect } from 'react'
+import { donations, campaigns } from '../services/api'
+import { formatDate, formatDonationAmount } from '../utils/format'
 
 function Donations() {
-  const [donationList, setDonationList] = useState([]);
-  const [campaignList, setCampaignList] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [deletingId, setDeletingId] = useState(null);
-  const [successMsg, setSuccessMsg] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
+  const [donationList, setDonationList] = useState([])
+  const [campaignList, setCampaignList] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState(null)
+  const [submitting, setSubmitting] = useState(false)
+  const [deletingId, setDeletingId] = useState(null)
+  const [successMsg, setSuccessMsg] = useState('')
+  const [errorMsg, setErrorMsg] = useState('')
   const [formData, setFormData] = useState({
     type: 'MONETARY',
     donorName: '',
@@ -23,88 +23,91 @@ function Donations() {
     category: '',
     quantity: 1,
     estimatedValue: ''
-  });
+  })
 
   const loadDonations = async () => {
     try {
-      const response = await donations.list();
-      setDonationList(response.data);
+      const response = await donations.list()
+      setDonationList(response.data)
     } catch (error) {
-      console.error('Error loading donations:', error);
+      console.error('Error loading donations:', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const loadCampaigns = async () => {
     try {
-      const response = await campaigns.list();
-      setCampaignList(response.data);
+      const response = await campaigns.list()
+      setCampaignList(response.data)
     } catch (error) {
-      console.error('Error loading campaigns:', error);
+      console.error('Error loading campaigns:', error)
     }
-  };
+  }
 
   useEffect(() => {
-    loadDonations();
-    loadCampaigns();
-  }, []);
+    const init = async () => {
+      await loadDonations()
+      await loadCampaigns()
+    }
+    init()
+  }, [])
 
   useEffect(() => {
-    if (!successMsg) return;
-    const t = setTimeout(() => setSuccessMsg(''), 5000);
-    return () => clearTimeout(t);
-  }, [successMsg]);
+    if (!successMsg) return
+    const t = setTimeout(() => setSuccessMsg(''), 5000)
+    return () => clearTimeout(t)
+  }, [successMsg])
 
   useEffect(() => {
-    if (!errorMsg) return;
-    const t = setTimeout(() => setErrorMsg(''), 5000);
-    return () => clearTimeout(t);
-  }, [errorMsg]);
+    if (!errorMsg) return
+    const t = setTimeout(() => setErrorMsg(''), 5000)
+    return () => clearTimeout(t)
+  }, [errorMsg])
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
+    e.preventDefault()
+    setSubmitting(true)
     try {
       const payload = {
         type: formData.type,
         donorName: formData.donorName,
         description: formData.description,
         campaignId: formData.campaignId ? parseInt(formData.campaignId) : null
-      };
+      }
 
       if (formData.type === 'MONETARY') {
-        payload.amount = parseFloat(formData.amount || 0);
-        payload.currency = formData.currency;
+        payload.amount = parseFloat(formData.amount || 0)
+        payload.currency = formData.currency
       } else {
-        payload.objectName = formData.objectName;
-        payload.category = formData.category;
-        payload.quantity = parseInt(formData.quantity) || 1;
-        payload.estimatedValue = parseFloat(formData.estimatedValue || 0);
+        payload.objectName = formData.objectName
+        payload.category = formData.category
+        payload.quantity = parseInt(formData.quantity) || 1
+        payload.estimatedValue = parseFloat(formData.estimatedValue || 0)
       }
 
       if (editingId) {
-        await donations.update(editingId, payload);
-        setSuccessMsg('Donación actualizada exitosamente');
+        await donations.update(editingId, payload)
+        setSuccessMsg('Donación actualizada exitosamente')
       } else {
-        await donations.create(payload);
-        setSuccessMsg('Donación registrada exitosamente');
+        await donations.create(payload)
+        setSuccessMsg('Donación registrada exitosamente')
       }
-      setErrorMsg('');
-      setShowForm(false);
-      setEditingId(null);
-      resetForm();
-      loadDonations();
+      setErrorMsg('')
+      setShowForm(false)
+      setEditingId(null)
+      resetForm()
+      loadDonations()
     } catch (error) {
-      console.error('Error saving donation:', error);
-      setErrorMsg(error.response?.data?.error || 'Error al guardar la donación');
+      console.error('Error saving donation:', error)
+      setErrorMsg(error.response?.data?.error || 'Error al guardar la donación')
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
-  };
+  }
 
   const handleEdit = (donation) => {
-    setEditingId(donation.id);
+    setEditingId(donation.id)
     setFormData({
       type: donation.type || 'MONETARY',
       donorName: donation.donorName || '',
@@ -116,25 +119,25 @@ function Donations() {
       category: donation.category || '',
       quantity: donation.quantity?.toString() || '1',
       estimatedValue: donation.estimatedValue?.toString() || ''
-    });
-    setShowForm(true);
-  };
+    })
+    setShowForm(true)
+  }
 
   const handleDelete = async (id) => {
-    if (!window.confirm('¿Está seguro de eliminar esta donación?')) return;
-    setDeletingId(id);
+    if (!window.confirm('¿Está seguro de eliminar esta donación?')) return
+    setDeletingId(id)
     try {
-      await donations.delete(id);
-      setSuccessMsg('Donación eliminada exitosamente');
-      setErrorMsg('');
-      loadDonations();
+      await donations.delete(id)
+      setSuccessMsg('Donación eliminada exitosamente')
+      setErrorMsg('')
+      loadDonations()
     } catch (error) {
-      console.error('Error deleting donation:', error);
-      setErrorMsg(error.response?.data?.error || 'Error al eliminar la donación');
+      console.error('Error deleting donation:', error)
+      setErrorMsg(error.response?.data?.error || 'Error al eliminar la donación')
     } finally {
-      setDeletingId(null);
+      setDeletingId(null)
     }
-  };
+  }
 
   const resetForm = () => {
     setFormData({
@@ -148,18 +151,18 @@ function Donations() {
       category: '',
       quantity: 1,
       estimatedValue: ''
-    });
-  };
+    })
+  }
 
   const cancelEdit = () => {
-    setShowForm(false);
-    setEditingId(null);
-    resetForm();
-  };
+    setShowForm(false)
+    setEditingId(null)
+    resetForm()
+  }
 
   useEffect(() => {
-    document.title = 'Donaciones - Donaton';
-  }, []);
+    document.title = 'Donaciones - Donaton'
+  }, [])
 
   return (
     <div className="container py-4">
@@ -371,7 +374,7 @@ function Donations() {
         </div>
       )}
     </div>
-  );
+  )
 }
 
-export default Donations;
+export default Donations

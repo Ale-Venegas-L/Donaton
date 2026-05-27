@@ -1,124 +1,127 @@
-import { useState, useEffect } from 'react';
-import { volunteers, campaigns } from '../services/api';
-import { formatDate } from '../utils/format';
+import { useState, useEffect } from 'react'
+import { volunteers, campaigns } from '../services/api'
+import {  } from '../utils/format'
 
 function Volunteers() {
-  const [volunteerList, setVolunteerList] = useState([]);
-  const [campaignList, setCampaignList] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [deletingId, setDeletingId] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [submittingAssign, setSubmittingAssign] = useState(false);
-  const [successMsg, setSuccessMsg] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
-  const [assignMode, setAssignMode] = useState(null);
+  const [volunteerList, setVolunteerList] = useState([])
+  const [campaignList, setCampaignList] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState(null)
+  const [deletingId, setDeletingId] = useState(null)
+  const [submitting, setSubmitting] = useState(false)
+  const [submittingAssign, setSubmittingAssign] = useState(false)
+  const [successMsg, setSuccessMsg] = useState('')
+  const [errorMsg, setErrorMsg] = useState('')
+  const [assignMode, setAssignMode] = useState(null)
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
     email: '',
     telefono: '',
     direccion: ''
-  });
-  const [assignData, setAssignData] = useState({ campaignId: '' });
+  })
+  const [assignData, setAssignData] = useState({ campaignId: '' })
 
   const loadVolunteers = async () => {
     try {
-      const response = await volunteers.list();
-      setVolunteerList(response.data);
+      const response = await volunteers.list()
+      setVolunteerList(response.data)
     } catch (error) {
-      console.error('Error loading volunteers:', error);
+      console.error('Error loading volunteers:', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const loadCampaigns = async () => {
     try {
-      const response = await campaigns.list();
-      setCampaignList(response.data);
+      const response = await campaigns.list()
+      setCampaignList(response.data)
     } catch (error) {
-      console.error('Error loading campaigns:', error);
+      console.error('Error loading campaigns:', error)
     }
-  };
+  }
 
   useEffect(() => {
-    loadVolunteers();
-    loadCampaigns();
-  }, []);
+    const init = async () => {
+      await loadVolunteers()
+      await loadCampaigns()
+    }
+    init()
+  }, [])
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
+    e.preventDefault()
+    setSubmitting(true)
     try {
       if (editingId) {
-        await volunteers.update(editingId, formData);
-        setSuccessMsg('Voluntario actualizado exitosamente');
+        await volunteers.update(editingId, formData)
+        setSuccessMsg('Voluntario actualizado exitosamente')
       } else {
-        await volunteers.create(formData);
-        setSuccessMsg('Voluntario registrado exitosamente');
+        await volunteers.create(formData)
+        setSuccessMsg('Voluntario registrado exitosamente')
       }
-      setErrorMsg('');
-      setShowForm(false);
-      setEditingId(null);
-      resetForm();
-      loadVolunteers();
+      setErrorMsg('')
+      setShowForm(false)
+      setEditingId(null)
+      resetForm()
+      loadVolunteers()
     } catch (error) {
-      console.error('Error saving volunteer:', error);
-      setErrorMsg(error.response?.data?.error || 'Error al guardar el voluntario');
+      console.error('Error saving volunteer:', error)
+      setErrorMsg(error.response?.data?.error || 'Error al guardar el voluntario')
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
-  };
+  }
 
   const handleAssignCampaign = async (volunteerId) => {
-    if (!assignData.campaignId) return;
-    setSubmittingAssign(true);
+    if (!assignData.campaignId) return
+    setSubmittingAssign(true)
     try {
       await volunteers.assignToCampaign(volunteerId, {
         campaignId: assignData.campaignId ? parseInt(assignData.campaignId) : null
-      });
-      setAssignMode(null);
-      setAssignData({ campaignId: '' });
-      setSuccessMsg('Voluntario asignado a campaña exitosamente');
-      setErrorMsg('');
-      loadVolunteers();
+      })
+      setAssignMode(null)
+      setAssignData({ campaignId: '' })
+      setSuccessMsg('Voluntario asignado a campaña exitosamente')
+      setErrorMsg('')
+      loadVolunteers()
     } catch (error) {
-      console.error('Error assigning campaign:', error);
-      setErrorMsg(error.response?.data?.error || 'Error al asignar a campaña');
+      console.error('Error assigning campaign:', error)
+      setErrorMsg(error.response?.data?.error || 'Error al asignar a campaña')
     } finally {
-      setSubmittingAssign(false);
+      setSubmittingAssign(false)
     }
-  };
+  }
 
   const handleEdit = (volunteer) => {
-    setEditingId(volunteer.id);
+    setEditingId(volunteer.id)
     setFormData({
       nombre: volunteer.nombre || '',
       apellido: volunteer.apellido || '',
       email: volunteer.email || '',
       telefono: volunteer.telefono || '',
       direccion: volunteer.direccion || ''
-    });
-    setShowForm(true);
-  };
+    })
+    setShowForm(true)
+  }
 
   const handleDelete = async (id) => {
-    if (!window.confirm('¿Está seguro de eliminar este voluntario?')) return;
-    setDeletingId(id);
+    if (!window.confirm('¿Está seguro de eliminar este voluntario?')) return
+    setDeletingId(id)
     try {
-      await volunteers.delete(id);
-      setSuccessMsg('Voluntario eliminado exitosamente');
-      setErrorMsg('');
-      loadVolunteers();
+      await volunteers.delete(id)
+      setSuccessMsg('Voluntario eliminado exitosamente')
+      setErrorMsg('')
+      loadVolunteers()
     } catch (error) {
-      console.error('Error deleting volunteer:', error);
-      setErrorMsg(error.response?.data?.error || 'Error al eliminar el voluntario');
+      console.error('Error deleting volunteer:', error)
+      setErrorMsg(error.response?.data?.error || 'Error al eliminar el voluntario')
     } finally {
-      setDeletingId(null);
+      setDeletingId(null)
     }
-  };
+  }
 
   const resetForm = () => {
     setFormData({
@@ -127,39 +130,39 @@ function Volunteers() {
       email: '',
       telefono: '',
       direccion: ''
-    });
-  };
+    })
+  }
 
   const cancelEdit = () => {
-    setShowForm(false);
-    setEditingId(null);
-    resetForm();
-  };
+    setShowForm(false)
+    setEditingId(null)
+    resetForm()
+  }
 
   useEffect(() => {
-    document.title = 'Voluntarios - Donaton';
-  }, []);
+    document.title = 'Voluntarios - Donaton'
+  }, [])
 
   useEffect(() => {
-    if (!successMsg) return;
-    const t = setTimeout(() => setSuccessMsg(''), 5000);
-    return () => clearTimeout(t);
-  }, [successMsg]);
+    if (!successMsg) return
+    const t = setTimeout(() => setSuccessMsg(''), 5000)
+    return () => clearTimeout(t)
+  }, [successMsg])
 
   useEffect(() => {
-    if (!errorMsg) return;
-    const t = setTimeout(() => setErrorMsg(''), 5000);
-    return () => clearTimeout(t);
-  }, [errorMsg]);
+    if (!errorMsg) return
+    const t = setTimeout(() => setErrorMsg(''), 5000)
+    return () => clearTimeout(t)
+  }, [errorMsg])
 
   return (
     <div className="container py-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1 className="fw-bold mb-0" style={{ color: 'var(--rojo)' }}>Voluntarios</h1>
         <button className="btn btn-primary" onClick={() => {
-          setShowForm(!showForm);
-          setEditingId(null);
-          resetForm();
+          setShowForm(!showForm)
+          setEditingId(null)
+          resetForm()
         }}>
           {showForm ? 'Cancelar' : 'Nuevo Voluntario'}
         </button>
@@ -337,7 +340,7 @@ function Volunteers() {
         </div>
       )}
     </div>
-  );
+  )
 }
 
-export default Volunteers;
+export default Volunteers

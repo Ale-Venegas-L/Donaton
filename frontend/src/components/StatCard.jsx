@@ -1,7 +1,7 @@
-import { useContador } from '../hooks/useContador';
+import { useContador } from '../hooks/useContador'
 
 export function StatCard({ title, apiPath, icon, color }) {
-  const { count, loading, error } = useContador(apiPath);
+  const { count, loading, error } = useContador(apiPath)
 
   return (
     <div className="card h-100 shadow-sm" style={{ borderLeft: `4px solid ${color}` }}>
@@ -19,5 +19,5 @@ export function StatCard({ title, apiPath, icon, color }) {
         </div>
       </div>
     </div>
-  );
+  )
 }

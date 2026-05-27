@@ -1,12 +1,12 @@
-import { useEffect } from 'react';
-import { StatCard } from '../components/StatCard';
-import RecentDonations from '../components/RecentDonations';
-import QuickActions from '../components/QuickActions';
+import { useEffect } from 'react'
+import { StatCard } from '../components/StatCard'
+import RecentDonations from '../components/RecentDonations'
+import QuickActions from '../components/QuickActions'
 
 function Home() {
   useEffect(() => {
-    document.title = 'Dashboard - Donaton';
-  }, []);
+    document.title = 'Dashboard - Donaton'
+  }, [])
   return (
     <div className="container py-4">
       <header className="text-center mb-4">
@@ -38,7 +38,7 @@ function Home() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default Home;
+export default Home
