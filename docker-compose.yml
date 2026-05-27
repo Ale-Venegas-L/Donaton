@@ -1,0 +1,167 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: paymentchain-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123}
+    volumes:
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    depends_on:
+      - apigateway
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  eureka:
+    build:
+      context: .
+      dockerfile: backend/infraestructuredomain/eureka/Dockerfile
+    ports:
+      - '8761:8761'
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  campaign:
+    build:
+      context: .
+      dockerfile: backend/businessdomain/campaign/Dockerfile
+    ports:
+      - '8081:8081'
+    depends_on:
+      eureka:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/campaigndb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123}
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  donation:
+    build:
+      context: .
+      dockerfile: backend/businessdomain/donation/Dockerfile
+    ports:
+      - '9082:8082'
+    depends_on:
+      eureka:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/donationdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123}
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  volunteers:
+    build:
+      context: .
+      dockerfile: backend/businessdomain/volunteers/Dockerfile
+    ports:
+      - '8083:8083'
+    depends_on:
+      eureka:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/volunteersdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123}
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  apigateway:
+    build:
+      context: .
+      dockerfile: backend/infraestructuredomain/apigateway/Dockerfile
+    ports:
+      - '8084:8084'
+    depends_on:
+      - eureka
+      - campaign
+      - donation
+      - volunteers
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  keycloak-proxy:
+    build:
+      context: .
+      dockerfile: backend/infraestructuredomain/keycloak/Dockerfile
+    ports:
+      - '8080:8080'
+    depends_on:
+      - eureka
+      - keycloak-real
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
+      KEYCLOAK_HOST: keycloak-real
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-qwerty}
+      KEYCLOAK_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KEYCLOAK_CERTS_ID: ${KEYCLOAK_CERTS_ID:-r2RN6wtySEg9M_cnH4OoLFUWGn6oDOzxh9DAtJIwpmk}
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  keycloak-real:
+    image: quay.io/keycloak/keycloak:26.1.0
+    command: start-dev --import-realm
+    ports:
+      - '8091:8080'
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
+      JAVA_OPTS: "-XX:MaxRAMPercentage=40"
+      KC_JAVA_OPTS: "-Xms256m -Xmx512m -XX:MetaspaceSize=96m -XX:MaxMetaspaceSize=128m"
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+volumes:
+  mysql-data:
+
+networks:
+  default:
+    name: paymentchain-net
