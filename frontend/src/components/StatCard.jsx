@@ -6,7 +6,7 @@ export function StatCard({ title, apiPath, icon, color }) {
   return (
     <div className="card h-100 shadow-sm" style={{ borderLeft: `4px solid ${color}` }}>
       <div className="card-body d-flex align-items-center gap-3">
-        <span className="fs-1">{icon}</span>
+        <span className="fs-1"><i className={`bi ${icon}`}></i></span>
         <div>
           <h6 className="card-subtitle mb-1 text-muted">{title}</h6>
           {loading ? (

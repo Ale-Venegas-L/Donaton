@@ -16,16 +16,14 @@ function Home() {
 
       <section className="row g-3 mb-4">
         <div className="col-md-3 col-sm-6">
-          <StatCard title="Campañas Activas" apiPath="/campaigns/active/count" icon="📢" color="#4b7bec" />
-        </div>
-        <div className="col-md-3 col-sm-6">
-          <StatCard title="Total Donaciones" apiPath="/donation/count" icon="💝" color="#ed4b69" />
-        </div>
-        <div className="col-md-3 col-sm-6">
-          <StatCard title="Donadores" apiPath="/donation/donors/count" icon="👥" color="#20bf6b" />
-        </div>
-        <div className="col-md-3 col-sm-6">
-          <StatCard title="Voluntarios" apiPath="/volunteers/count" icon="🙋" color="#f7b731" />
+           <StatCard title="Campañas Activas" apiPath="/campaigns/active/count" icon="bi-megaphone" color="#4b7bec" />
+
+           <StatCard title="Total Donaciones" apiPath="/donation/count" icon="bi-heart-fill" color="#ed4b69" />
+
+           <StatCard title="Donadores" apiPath="/donation/donors/count" icon="bi-people-fill" color="#20bf6b" />
+
+           <StatCard title="Voluntarios" apiPath="/volunteers/count" icon="bi-person-raised-hand" color="#f7b731" />
+
         </div>
       </section>
 

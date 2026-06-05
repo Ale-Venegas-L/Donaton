@@ -169,8 +169,8 @@ function Donations() {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1 className="fw-bold mb-0" style={{ color: 'var(--rojo)' }}>Donaciones</h1>
         <button className="btn btn-primary" onClick={() => {
-          if (showForm) { setShowForm(false); setEditingId(null); resetForm(); }
-          else { setShowForm(true); setEditingId(null); resetForm(); }
+          if (showForm) { setShowForm(false); setEditingId(null); resetForm() }
+          else { setShowForm(true); setEditingId(null); resetForm() }
         }}>
           {showForm ? 'Cancelar' : 'Registrar Donación'}
         </button>
@@ -362,9 +362,9 @@ function Donations() {
                   <td>{donation.campaign?.nombre || campaignList.find(c => c.id === donation.campaignId)?.nombre || '-'}</td>
                   <td>{formatDate(donation.registrationDate)}</td>
                   <td>
-                    <button className="btn btn-sm btn-success me-1" onClick={() => handleEdit(donation)} title="Editar" aria-label="Editar donación">✏️</button>
+                    <button className="btn btn-sm btn-success me-1" onClick={() => handleEdit(donation)} title="Editar" aria-label="Editar donación"><i className="bi bi-pencil"></i></button>
                     <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(donation.id)} disabled={deletingId === donation.id} title="Eliminar" aria-label="Eliminar donación">
-                      {deletingId === donation.id ? '...' : '🗑️'}
+                      {deletingId === donation.id ? '...' : <i className="bi bi-trash"></i>}
                     </button>
                   </td>
                 </tr>

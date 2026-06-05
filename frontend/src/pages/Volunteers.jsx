@@ -288,51 +288,42 @@ function Volunteers() {
                       <span className="no-campaigns">Sin asignar</span>
                     )}
                   </td>
-                  <td>
-                    <div className="d-flex gap-1 align-items-center">
-                      {assignMode === volunteer.id ? (
-                        <div className="d-flex align-items-center gap-1">
-                          <select
-                            className="form-select form-select-sm"
-                            value={assignData.campaignId}
-                            onChange={(e) => setAssignData({...assignData, campaignId: e.target.value})}
-                            style={{ width: 'auto' }}
-                          >
-                            <option value="">Seleccionar</option>
-                            {campaignList.map((c) => (
-                              <option key={c.id} value={c.id}>{c.nombre}</option>
-                            ))}
-                          </select>
-                          <button
-                            className="btn btn-sm btn-success"
-                            onClick={() => handleAssignCampaign(volunteer.id)}
-                            disabled={submittingAssign}
-                          >
-                            {submittingAssign ? '...' : '✓'}
-                          </button>
-                          <button
-                            className="btn btn-sm btn-outline-secondary"
-                            onClick={() => setAssignMode(null)}
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      ) : (
-                        <>
-                          <button
-                            className="btn btn-sm btn-secondary"
-                            onClick={() => setAssignMode(volunteer.id)}
-                          >
-                            Asignar a Campaña
-                          </button>
-                          <button className="btn btn-sm btn-success" onClick={() => handleEdit(volunteer)} title="Editar" aria-label="Editar voluntario">✏️</button>
-                          <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(volunteer.id)} disabled={deletingId === volunteer.id} title="Eliminar" aria-label="Eliminar voluntario">
-                            {deletingId === volunteer.id ? '...' : '🗑️'}
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </td>
+                   <td>
+                     <div className="d-flex gap-1 align-items-center">
+                       {assignMode === volunteer.id ? (
+                         <div className="d-flex align-items-center gap-1">
+                           <select
+                             className="form-select form-select-sm"
+                             value={assignData.campaignId}
+                             onChange={(e) => setAssignData({...assignData, campaignId: e.target.value})}
+                             style={{ width: 'auto' }}
+                           >
+                             <option value="">Seleccionar</option>
+                             {campaignList.map((c) => (
+                               <option key={c.id} value={c.id}>{c.nombre}</option>
+                             ))}
+                           </select>
+                           <button
+                             className="btn btn-sm btn-success"
+                             onClick={() => handleAssignCampaign(volunteer.id)}
+                             disabled={submittingAssign}
+                           >
+                             {submittingAssign ? '...' : 'Asignar'}
+                           </button>
+                         </div>
+                       ) : (
+                         <div className="d-flex gap-1">
+                           <button className="btn btn-sm btn-outline-primary" onClick={() => setAssignMode(volunteer.id)} title="Asignar Campaña"><i className="bi bi-megaphone"></i></button>
+                           <button className="btn btn-sm btn-outline-secondary" onClick={() => handleEdit(volunteer)} title="Editar"><i className="bi bi-pencil"></i></button>
+                           <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(volunteer.id)} disabled={deletingId === volunteer.id} title="Eliminar">
+                             {deletingId === volunteer.id ? '...' : <i className="bi bi-trash"></i>}
+                           </button>
+                         </div>
+                       )}
+                     </div>
+                   </td>
+
+
                 </tr>
               ))}
             </tbody>

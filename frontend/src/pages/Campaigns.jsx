@@ -254,10 +254,11 @@ function Campaigns() {
                   </div>
                 </div>
                 <div className="card-footer bg-white border-top-0 d-flex gap-2 justify-content-end pt-0">
-                  <button className="btn btn-sm btn-success" onClick={() => handleEdit(campaign)} title="Editar" aria-label="Editar campaña">✏️</button>
-                  <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(campaign.id)} disabled={deletingId === campaign.id} title="Eliminar" aria-label="Eliminar campaña">
-                    {deletingId === campaign.id ? '...' : '🗑️'}
-                  </button>
+                   <button className="btn btn-sm btn-success" onClick={() => handleEdit(campaign)} title="Editar" aria-label="Editar campaña"><i className="bi bi-pencil"></i></button>
+                   <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(campaign.id)} disabled={deletingId === campaign.id} title="Eliminar" aria-label="Eliminar campaña">
+                     {deletingId === campaign.id ? '...' : <i className="bi bi-trash"></i>}
+                   </button>
+
                 </div>
               </div>
             </div>
