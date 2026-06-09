@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { auth as authService } from '../services/api'
 import { AuthContext } from './AuthContext'
 
@@ -19,39 +19,30 @@ function parseUserFromToken(token) {
   }
 }
 
-
-
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
-
-  const checkAuth = useCallback(() => {
+  const [loading, setLoading] = useState(false)
+  const [user, setUser] = useState(() => {
     const token = localStorage.getItem('access_token')
-    if (token) {
-      setUser(parseUserFromToken(token))
-    } else {
-      setUser(null)
-    }
+    return token ? parseUserFromToken(token) : null
+  })
+
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
     setLoading(false)
   }, [])
 
-  useEffect(() => {
-    const initAuth = async () => {
-      await checkAuth()
-    }
-    initAuth()
-  }, [checkAuth])
-
-  const login = async (username, password) => {
+  const login = useCallback(async (username, password) => {
     const response = await authService.login({ username, password })
     const data = response.data
-    localStorage.setItem('access_token', data.access_token)
+    const token = data.access_token
+    localStorage.setItem('access_token', token)
     localStorage.setItem('refresh_token', data.refresh_token)
-    setUser(parseUserFromToken(data.access_token))
+    setUser(parseUserFromToken(token))
     return data
-  }
+  }, [])
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     const refreshToken = localStorage.getItem('refresh_token')
     if (refreshToken) {
       try {
@@ -63,10 +54,12 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
     setUser(null)
-  }
+  }, [])
+
+  const value = useMemo(() => ({ user, loading, login, logout }), [user, loading, login, logout])
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   )

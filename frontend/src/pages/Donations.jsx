@@ -1,18 +1,20 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useReducer } from 'react'
 import { donations, campaigns } from '../services/api'
 import { formatDate, formatDonationAmount } from '../utils/format'
+import DonationForm from '../components/DonationForm'
+import DonationTable from '../components/DonationTable'
 
-function Donations() {
-  const [donationList, setDonationList] = useState([])
-  const [campaignList, setCampaignList] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
-  const [editingId, setEditingId] = useState(null)
-  const [submitting, setSubmitting] = useState(false)
-  const [deletingId, setDeletingId] = useState(null)
-  const [successMsg, setSuccessMsg] = useState('')
-  const [errorMsg, setErrorMsg] = useState('')
-  const [formData, setFormData] = useState({
+const initialState = {
+  donationList: [],
+  campaignList: [],
+  loading: true,
+  showForm: false,
+  editingId: null,
+  submitting: false,
+  deletingId: null,
+  successMsg: '',
+  errorMsg: '',
+  formData: {
     type: 'MONETARY',
     donorName: '',
     description: '',
@@ -23,23 +25,45 @@ function Donations() {
     category: '',
     quantity: 1,
     estimatedValue: ''
-  })
+  }
+}
+
+function donationReducer(state, action) {
+  switch (action.type) {
+    case 'SET_DONATIONS': return { ...state, donationList: action.payload, loading: false }
+    case 'SET_CAMPAIGNS': return { ...state, campaignList: action.payload }
+    case 'SET_LOADING': return { ...state, loading: action.payload }
+    case 'TOGGLE_FORM': return { ...state, showForm: !state.showForm, editingId: null, formData: action.payload || initialState.formData }
+    case 'SET_EDITING': return { ...state, editingId: action.id, formData: action.formData, showForm: true }
+    case 'SUBMITTING': return { ...state, submitting: action.payload }
+    case 'SET_SUCCESS': return { ...state, successMsg: action.payload, errorMsg: '' }
+    case 'SET_ERROR': return { ...state, errorMsg: action.payload, successMsg: '' }
+    case 'SET_DELETING': return { ...state, deletingId: action.payload }
+    case 'RESET_FORM': return { ...state, formData: initialState.formData, showForm: false, editingId: null }
+    case 'SET_FORM_DATA': return { ...state, formData: action.payload }
+    default: return state
+  }
+}
+
+function Donations() {
+  const [state, dispatch] = useReducer(donationReducer, initialState)
+  const { donationList, campaignList, loading, showForm, editingId, submitting, deletingId, successMsg, errorMsg, formData } = state
 
   const loadDonations = async () => {
     try {
       const response = await donations.list()
-      setDonationList(response.data)
+      dispatch({ type: 'SET_DONATIONS', payload: response.data })
     } catch (error) {
       console.error('Error loading donations:', error)
     } finally {
-      setLoading(false)
+      dispatch({ type: 'SET_LOADING', payload: false })
     }
   }
 
   const loadCampaigns = async () => {
     try {
       const response = await campaigns.list()
-      setCampaignList(response.data)
+      dispatch({ type: 'SET_CAMPAIGNS', payload: response.data })
     } catch (error) {
       console.error('Error loading campaigns:', error)
     }
@@ -47,27 +71,26 @@ function Donations() {
 
   useEffect(() => {
     const init = async () => {
-      await loadDonations()
-      await loadCampaigns()
+      await Promise.all([loadDonations(), loadCampaigns()])
     }
     init()
   }, [])
 
   useEffect(() => {
     if (!successMsg) return
-    const t = setTimeout(() => setSuccessMsg(''), 5000)
+    const t = setTimeout(() => dispatch({ type: 'SET_SUCCESS', payload: '' }), 5000)
     return () => clearTimeout(t)
   }, [successMsg])
 
   useEffect(() => {
     if (!errorMsg) return
-    const t = setTimeout(() => setErrorMsg(''), 5000)
+    const t = setTimeout(() => dispatch({ type: 'SET_ERROR', payload: '' }), 5000)
     return () => clearTimeout(t)
   }, [errorMsg])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setSubmitting(true)
+    dispatch({ type: 'SUBMITTING', payload: true })
     try {
       const payload = {
         type: formData.type,
@@ -88,76 +111,53 @@ function Donations() {
 
       if (editingId) {
         await donations.update(editingId, payload)
-        setSuccessMsg('Donación actualizada exitosamente')
+        dispatch({ type: 'SET_SUCCESS', payload: 'Donación actualizada exitosamente' })
       } else {
         await donations.create(payload)
-        setSuccessMsg('Donación registrada exitosamente')
+        dispatch({ type: 'SET_SUCCESS', payload: 'Donación registrada exitosamente' })
       }
-      setErrorMsg('')
-      setShowForm(false)
-      setEditingId(null)
-      resetForm()
+      dispatch({ type: 'RESET_FORM' })
       loadDonations()
     } catch (error) {
       console.error('Error saving donation:', error)
-      setErrorMsg(error.response?.data?.error || 'Error al guardar la donación')
+      dispatch({ type: 'SET_ERROR', payload: error.response?.data?.error || 'Error al guardar la donación' })
     } finally {
-      setSubmitting(false)
+      dispatch({ type: 'SUBMITTING', payload: false })
     }
   }
 
   const handleEdit = (donation) => {
-    setEditingId(donation.id)
-    setFormData({
-      type: donation.type || 'MONETARY',
-      donorName: donation.donorName || '',
-      description: donation.description || '',
-      campaignId: donation.campaignId?.toString() || '',
-      amount: donation.amount?.toString() || '',
-      currency: donation.currency || 'CLP',
-      objectName: donation.objectName || '',
-      category: donation.category || '',
-      quantity: donation.quantity?.toString() || '1',
-      estimatedValue: donation.estimatedValue?.toString() || ''
+    dispatch({ 
+      type: 'SET_EDITING', 
+      id: donation.id, 
+      formData: {
+        type: donation.type || 'MONETARY',
+        donorName: donation.donorName || '',
+        description: donation.description || '',
+        campaignId: donation.campaignId?.toString() || '',
+        amount: donation.amount?.toString() || '',
+        currency: donation.currency || 'CLP',
+        objectName: donation.objectName || '',
+        category: donation.category || '',
+        quantity: donation.quantity?.toString() || '1',
+        estimatedValue: donation.estimatedValue?.toString() || ''
+      } 
     })
-    setShowForm(true)
   }
 
   const handleDelete = async (id) => {
     if (!window.confirm('¿Está seguro de eliminar esta donación?')) return
-    setDeletingId(id)
+    dispatch({ type: 'SET_DELETING', payload: id })
     try {
       await donations.delete(id)
-      setSuccessMsg('Donación eliminada exitosamente')
-      setErrorMsg('')
+      dispatch({ type: 'SET_SUCCESS', payload: 'Donación eliminada exitosamente' })
       loadDonations()
     } catch (error) {
       console.error('Error deleting donation:', error)
-      setErrorMsg(error.response?.data?.error || 'Error al eliminar la donación')
+      dispatch({ type: 'SET_ERROR', payload: error.response?.data?.error || 'Error al eliminar la donación' })
     } finally {
-      setDeletingId(null)
+      dispatch({ type: 'SET_DELETING', payload: null })
     }
-  }
-
-  const resetForm = () => {
-    setFormData({
-      type: 'MONETARY',
-      donorName: '',
-      description: '',
-      campaignId: '',
-      amount: '',
-      currency: 'CLP',
-      objectName: '',
-      category: '',
-      quantity: 1,
-      estimatedValue: ''
-    })
-  }
-
-  const cancelEdit = () => {
-    setShowForm(false)
-    setEditingId(null)
-    resetForm()
   }
 
   useEffect(() => {
@@ -168,10 +168,7 @@ function Donations() {
     <div className="container py-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1 className="fw-bold mb-0" style={{ color: 'var(--rojo)' }}>Donaciones</h1>
-        <button className="btn btn-primary" onClick={() => {
-          if (showForm) { setShowForm(false); setEditingId(null); resetForm() }
-          else { setShowForm(true); setEditingId(null); resetForm() }
-        }}>
+        <button type="button" className="btn btn-primary" onClick={() => dispatch({ type: 'TOGGLE_FORM' })}>
           {showForm ? 'Cancelar' : 'Registrar Donación'}
         </button>
       </div>
@@ -179,155 +176,26 @@ function Donations() {
       {successMsg && (
         <div className="alert alert-success alert-dismissible py-2 fade show">
           {successMsg}
-          <button type="button" className="btn-close" onClick={() => setSuccessMsg('')} />
+          <button type="button" className="btn-close" onClick={() => dispatch({ type: 'SET_SUCCESS', payload: '' })} aria-label="Cerrar mensaje de éxito" />
         </div>
       )}
       {errorMsg && (
         <div className="alert alert-danger alert-dismissible py-2 fade show">
           {errorMsg}
-          <button type="button" className="btn-close" onClick={() => setErrorMsg('')} />
+          <button type="button" className="btn-close" onClick={() => dispatch({ type: 'SET_ERROR', payload: '' })} aria-label="Cerrar mensaje de error" />
         </div>
       )}
 
       {showForm && (
-        <div className="card shadow-sm mb-4">
-          <div className="card-body">
-            <h5 className="card-title">{editingId ? 'Editar Donación' : 'Nueva Donación'}</h5>
-            <form onSubmit={handleSubmit}>
-              <div className="mb-3">
-                <label className="form-label">Tipo de Donación:</label>
-                <select
-                  className="form-select"
-                  value={formData.type}
-                  onChange={(e) => setFormData({...formData, type: e.target.value})}
-                >
-                  <option value="MONETARY">Monetaria</option>
-                  <option value="OBJECT">Objeto</option>
-                </select>
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Nombre del Donador:</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={formData.donorName}
-                  onChange={(e) => setFormData({...formData, donorName: e.target.value})}
-                  required
-                  maxLength={100}
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Campaña:</label>
-                <select
-                  className="form-select"
-                  value={formData.campaignId}
-                  onChange={(e) => setFormData({...formData, campaignId: e.target.value})}
-                  required
-                >
-                  <option value="">Seleccionar campaña</option>
-                  {campaignList.map((c) => (
-                    <option key={c.id} value={c.id}>{c.nombre}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Descripción:</label>
-                <textarea
-                  className="form-control"
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  maxLength={500}
-                />
-              </div>
-
-              {formData.type === 'MONETARY' ? (
-                <div className="row g-3">
-                  <div className="col-md-6">
-                    <label className="form-label">Monto:</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      value={formData.amount}
-                      onChange={(e) => setFormData({...formData, amount: e.target.value})}
-                      required
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label">Moneda:</label>
-                    <select
-                      className="form-select"
-                      value={formData.currency}
-                      onChange={(e) => setFormData({...formData, currency: e.target.value})}
-                    >
-                      <option value="CLP">CLP</option>
-                      <option value="USD">USD</option>
-                      <option value="EUR">EUR</option>
-                    </select>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <div className="row g-3">
-                    <div className="col-md-6">
-                      <label className="form-label">Nombre del Objeto:</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={formData.objectName}
-                        onChange={(e) => setFormData({...formData, objectName: e.target.value})}
-                        required
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label">Categoría:</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={formData.category}
-                        onChange={(e) => setFormData({...formData, category: e.target.value})}
-                      />
-                    </div>
-                  </div>
-                  <div className="row g-3">
-                    <div className="col-md-6">
-                      <label className="form-label">Cantidad:</label>
-                      <input
-                        type="number"
-                        min="1"
-                        className="form-control"
-                        value={formData.quantity}
-                        onChange={(e) => setFormData({...formData, quantity: e.target.value})}
-                        required
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label">Valor Estimado:</label>
-                      <input
-                        type="number"
-                        className="form-control"
-                        value={formData.estimatedValue}
-                        onChange={(e) => setFormData({...formData, estimatedValue: e.target.value})}
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-
-              <div className="d-flex gap-2 mt-3">
-                <button type="submit" className="btn btn-primary" disabled={submitting}>
-                  {submitting ? 'Guardando...' : editingId ? 'Guardar Cambios' : 'Registrar Donación'}
-                </button>
-                {editingId && (
-                  <button type="button" className="btn btn-secondary" onClick={cancelEdit}>
-                    Cancelar
-                  </button>
-                )}
-              </div>
-            </form>
-          </div>
-        </div>
+        <DonationForm 
+          formData={formData} 
+          setFormData={(newData) => dispatch({ type: 'SET_FORM_DATA', payload: newData })} // Note: I need to add SET_FORM_DATA to reducer
+          handleSubmit={handleSubmit} 
+          submitting={submitting} 
+          editingId={editingId} 
+          cancelEdit={() => dispatch({ type: 'RESET_FORM' })}
+          campaignList={campaignList}
+        />
       )}
 
       {loading ? (
@@ -335,43 +203,13 @@ function Donations() {
       ) : donationList.length === 0 ? (
         <div className="text-muted text-center py-4">No hay donaciones registradas</div>
       ) : (
-        <div className="table-responsive bg-white rounded shadow-sm">
-          <table className="table table-hover align-middle mb-0">
-            <thead className="table-light">
-              <tr>
-                <th>ID</th>
-                <th>Donador</th>
-                <th>Tipo</th>
-                <th>Monto/Objeto</th>
-                <th>Campaña</th>
-                <th>Fecha</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {donationList.map((donation) => (
-                <tr key={donation.id}>
-                  <td>{donation.id}</td>
-                  <td>{donation.donorName}</td>
-                  <td>
-                    <span className={`status ${donation.type === 'MONETARY' ? 'status-active' : 'status-pending'}`}>
-                      {donation.type === 'MONETARY' ? 'Monetaria' : 'Objeto'}
-                    </span>
-                  </td>
-                    <td>{formatDonationAmount(donation)}</td>
-                  <td>{donation.campaign?.nombre || campaignList.find(c => c.id === donation.campaignId)?.nombre || '-'}</td>
-                  <td>{formatDate(donation.registrationDate)}</td>
-                  <td>
-                    <button className="btn btn-sm btn-success me-1" onClick={() => handleEdit(donation)} title="Editar" aria-label="Editar donación"><i className="bi bi-pencil"></i></button>
-                    <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(donation.id)} disabled={deletingId === donation.id} title="Eliminar" aria-label="Eliminar donación">
-                      {deletingId === donation.id ? '...' : <i className="bi bi-trash"></i>}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DonationTable 
+          donations={donationList} 
+          campaigns={campaignList} 
+          onEdit={handleEdit} 
+          onDelete={handleDelete} 
+          deletingId={deletingId} 
+        />
       )}
     </div>
   )

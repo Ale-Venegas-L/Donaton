@@ -24,11 +24,11 @@ function ProtectedRoute({ children }) {
   return children
 }
 
-function ProtectedRouteByRole({ children, role }) {
+function ProtectedRouteByRole({ children, requiredRole }) {
   const { user, loading } = useAuth()
   if (loading) return <div className="text-center py-4 text-muted">Cargando...</div>
   if (!user) return <Navigate to="/login" replace />
-  if (!user.roles?.includes(role)) return <Navigate to="/" replace />
+  if (!user.roles?.includes(requiredRole)) return <Navigate to="/" replace />
   return children
 }
 
@@ -58,7 +58,8 @@ function Navbar() {
           {user && (
             <>
               <span className="text-light opacity-75 small me-2">{user.username}</span>
-              <button onClick={logout} className="btn btn-outline-light btn-sm">Cerrar Sesión</button>
+               <button onClick={logout} type="button" className="btn btn-outline-light btn-sm">Cerrar Sesión</button>
+
             </>
           )}
         </div>
@@ -90,11 +91,12 @@ function App() {
               <Donations />
             </ProtectedRoute>
           } />
-          <Route path="/volunteers" element={
-            <ProtectedRouteByRole role="VolunteerManager">
-              <Volunteers />
-            </ProtectedRouteByRole>
-          } />
+           <Route path="/volunteers" element={
+             <ProtectedRouteByRole requiredRole="VolunteerManager">
+               <Volunteers />
+             </ProtectedRouteByRole>
+           } />
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

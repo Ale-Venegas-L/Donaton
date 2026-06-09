@@ -36,7 +36,7 @@ export default function Login() {
         {error && (
           <div className="alert alert-danger alert-dismissible py-2 fade show">
             {error}
-            <button type="button" className="btn-close" onClick={() => setError('')} />
+            <button type="button" className="btn-close" onClick={() => setError('')} aria-label="Cerrar alerta de error" />
           </div>
         )}
         <form onSubmit={handleSubmit}>

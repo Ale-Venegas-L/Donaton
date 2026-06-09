@@ -27,7 +27,6 @@ class DonationFactoryTest {
 
     @Test
     void createDonation_WithUnsupportedType_ShouldThrowException() {
-        // This test is a placeholder for any custom types added in future
-        // Since DonationType is an enum, invalid values usually come from valueOf
+        // placeholder
     }
 }

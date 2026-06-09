@@ -4,6 +4,7 @@ import { formatDateLong, formatCurrency } from '../utils/format'
 
 export function RecentDonations() {
   const [recentDonations, setRecentDonations] = useState([])
+
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 

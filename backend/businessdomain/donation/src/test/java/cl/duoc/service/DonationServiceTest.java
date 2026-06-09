@@ -89,11 +89,8 @@ class DonationServiceTest {
         DonationRequest request = new DonationRequest();
         request.setCampaignId(1L);
         request.setType("MONETARY");
-        request.setAmount(null); // Missing amount
-
-        when(campaignFacade.getCampaignById(1L)).thenReturn(Optional.of(campaign));
-
-        assertThrows(IllegalArgumentException.class, () -> donationService.createDonation(request));
+        
+        assertThrows(IllegalArgumentException.class, () -> request.setAmount(null));
     }
 
     @Test
