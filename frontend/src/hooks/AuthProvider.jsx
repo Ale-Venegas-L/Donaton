@@ -26,11 +26,10 @@ export const AuthProvider = ({ children }) => {
     return token ? parseUserFromToken(token) : null
   })
 
-  const [loading, setLoading] = useState(false)
-
   useEffect(() => {
     setLoading(false)
   }, [])
+
 
   const login = useCallback(async (username, password) => {
     const response = await authService.login({ username, password })

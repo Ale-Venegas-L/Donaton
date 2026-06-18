@@ -1,4 +1,3 @@
-import React from 'react'
 
 function DonationForm({ formData, setFormData, handleSubmit, submitting, editingId, cancelEdit, campaignList }) {
   return (

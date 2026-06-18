@@ -1,4 +1,3 @@
-import React from 'react'
 import { formatDate, formatDonationAmount } from '../utils/format'
 
 function DonationTable({ donations, campaigns, onEdit, onDelete, deletingId }) {

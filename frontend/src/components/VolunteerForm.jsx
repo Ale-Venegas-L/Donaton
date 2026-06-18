@@ -1,4 +1,3 @@
-import React from 'react'
 
 function VolunteerForm({ formData, setFormData, handleSubmit, submitting, editingId, cancelEdit }) {
   return (
