@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth.jsx'
 export default function Login() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
@@ -52,18 +53,27 @@ export default function Login() {
               required
             />
           </div>
-          <div className="mb-3">
-            <label htmlFor="password" className="form-label">Contraseña</label>
-            <input
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              className="form-control"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+           <div className="mb-3">
+             <label htmlFor="password" className="form-label">Contraseña</label>
+             <div className="input-group">
+               <input
+                 type={showPassword ? 'text' : 'password'}
+                 id="password"
+                 autoComplete="current-password"
+                 className="form-control"
+                 value={password}
+                 onChange={(e) => setPassword(e.target.value)}
+                 required
+               />
+               <button 
+                 className="btn btn-outline-secondary" 
+                 type="button" 
+                 onClick={() => setShowPassword(!showPassword)}
+               >
+                 {showPassword ? 'Ocultar' : 'Mostrar'}
+               </button>
+             </div>
+           </div>
           <button type="submit" disabled={loading} className="btn btn-primary w-100 py-2 mt-3">
             {loading ? 'Ingresando...' : 'Iniciar Sesión'}
           </button>

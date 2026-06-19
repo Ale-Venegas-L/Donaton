@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { auth as authService } from '../services/api'
 import { AuthContext } from './AuthContext'
 
@@ -20,17 +20,13 @@ function parseUserFromToken(token) {
 }
 
 export const AuthProvider = ({ children }) => {
-  const [loading, setLoading] = useState(false)
+  const [loading] = useState(false)
   const [user, setUser] = useState(() => {
     const token = localStorage.getItem('access_token')
     return token ? parseUserFromToken(token) : null
   })
-
-  useEffect(() => {
-    setLoading(false)
-  }, [])
-
-
+ 
+ 
   const login = useCallback(async (username, password) => {
     const response = await authService.login({ username, password })
     const data = response.data

@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
+@org.springframework.web.bind.annotation.RequestMapping("/auth")
 public class IndexController {
     private Logger logger = LoggerFactory.getLogger(IndexController.class);
 

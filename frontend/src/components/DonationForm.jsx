@@ -46,13 +46,14 @@ function DonationForm({ formData, setFormData, handleSubmit, submitting, editing
           </div>
           <div className="mb-3">
             <label htmlFor="description" className="form-label">Descripción:</label>
-            <textarea
-              id="description"
-              className="form-control"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              maxLength={500}
-            />
+              <textarea
+                id="description"
+                className="form-control"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                maxLength={500}
+                required
+              />
           </div>
 
           {formData.type === 'MONETARY' ? (

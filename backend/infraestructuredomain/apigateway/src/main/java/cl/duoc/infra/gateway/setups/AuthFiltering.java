@@ -49,7 +49,7 @@ public class AuthFiltering implements GlobalFilter, Ordered {
 
         return webclientBuilder.build()
                 .get()
-                .uri("lb://keycloak/roles")
+                .uri("lb://keycloak/auth/roles")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + parts[1])
                 .retrieve()
                 .bodyToMono(JsonNode.class)
