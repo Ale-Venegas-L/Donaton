@@ -1,9 +1,0 @@
-CREATE DATABASE IF NOT EXISTS campaigndb;
-CREATE DATABASE IF NOT EXISTS donationdb;
-CREATE DATABASE IF NOT EXISTS volunteersdb;
-
-CREATE USER IF NOT EXISTS 'donaton'@'%' IDENTIFIED BY 'donaton123';
-GRANT ALL PRIVILEGES ON campaigndb.* TO 'donaton'@'%';
-GRANT ALL PRIVILEGES ON donationdb.* TO 'donaton'@'%';
-GRANT ALL PRIVILEGES ON volunteersdb.* TO 'donaton'@'%';
-FLUSH PRIVILEGES;
