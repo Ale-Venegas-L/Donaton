@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router'
 import { auth } from '../services/api'
@@ -10,6 +11,43 @@ export default function Register() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
+=======
+import { useReducer, useRef, useEffect, useState } from 'react'
+import { useNavigate, Link } from 'react-router'
+import { auth } from '../services/api'
+
+const initialState = {
+  username: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  error: '',
+  success: '',
+  loading: false
+}
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'SET_FIELD':
+      return { ...state, [action.field]: action.value }
+    case 'SET_ERROR':
+      return { ...state, error: action.value, success: '' }
+    case 'SET_SUCCESS':
+      return { ...state, success: action.value, error: '' }
+    case 'SET_LOADING':
+      return { ...state, loading: action.value }
+    case 'RESET_MESSAGES':
+      return { ...state, error: '', success: '' }
+    default:
+      return state
+  }
+}
+
+export default function Register() {
+  const [state, dispatch] = useReducer(reducer, initialState)
+  const { username, email, password, confirmPassword, error, success, loading } = state
+  const [showPassword, setShowPassword] = useState(false)
+>>>>>>> develop
   const navigate = useNavigate()
   const redirectTimer = useRef(null)
 
@@ -18,13 +56,20 @@ export default function Register() {
   }, [])
 
   useEffect(() => {
+<<<<<<< HEAD
     return () => {
       if (redirectTimer.current) clearTimeout(redirectTimer.current)
+=======
+    const timerRef = redirectTimer.current
+    return () => {
+      if (timerRef) clearTimeout(timerRef)
+>>>>>>> develop
     }
   }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+<<<<<<< HEAD
     setError('')
     setSuccess('')
 
@@ -42,6 +87,24 @@ export default function Register() {
       setError(err.response?.data?.error || 'Error al registrar usuario')
     } finally {
       setLoading(false)
+=======
+    dispatch({ type: 'RESET_MESSAGES' })
+
+    if (password !== confirmPassword) {
+      dispatch({ type: 'SET_ERROR', value: 'Las contraseñas no coinciden' })
+      return
+    }
+
+    dispatch({ type: 'SET_LOADING', value: true })
+    try {
+      await auth.register({ username, password, email })
+      dispatch({ type: 'SET_SUCCESS', value: 'Usuario registrado exitosamente. Redirigiendo al login...' })
+      redirectTimer.current = setTimeout(() => navigate('/login'), 2000)
+    } catch (err) {
+      dispatch({ type: 'SET_ERROR', value: err.response?.data?.error || 'Error al registrar usuario' })
+    } finally {
+      dispatch({ type: 'SET_LOADING', value: false })
+>>>>>>> develop
     }
   }
 
@@ -53,13 +116,21 @@ export default function Register() {
         {error && (
           <div className="alert alert-danger alert-dismissible py-2 fade show">
             {error}
+<<<<<<< HEAD
             <button type="button" className="btn-close" onClick={() => setError('')} />
+=======
+            <button type="button" className="btn-close" onClick={() => dispatch({ type: 'SET_ERROR', value: '' })} aria-label="Cerrar alerta de error" />
+>>>>>>> develop
           </div>
         )}
         {success && (
           <div className="alert alert-success alert-dismissible py-2 fade show">
             {success}
+<<<<<<< HEAD
             <button type="button" className="btn-close" onClick={() => setSuccess('')} />
+=======
+            <button type="button" className="btn-close" onClick={() => dispatch({ type: 'SET_SUCCESS', value: '' })} aria-label="Cerrar alerta de éxito" />
+>>>>>>> develop
           </div>
         )}
         <form onSubmit={handleSubmit}>
@@ -71,7 +142,11 @@ export default function Register() {
               autoComplete="username"
               className="form-control"
               value={username}
+<<<<<<< HEAD
               onChange={(e) => setUsername(e.target.value)}
+=======
+              onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'username', value: e.target.value })}
+>>>>>>> develop
               required
               maxLength={50}
             />
@@ -84,11 +159,16 @@ export default function Register() {
               autoComplete="email"
               className="form-control"
               value={email}
+<<<<<<< HEAD
               onChange={(e) => setEmail(e.target.value)}
+=======
+              onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'email', value: e.target.value })}
+>>>>>>> develop
               required
               maxLength={254}
             />
           </div>
+<<<<<<< HEAD
           <div className="mb-3">
             <label htmlFor="password" className="form-label">Contraseña</label>
             <input
@@ -115,6 +195,52 @@ export default function Register() {
               minLength={8}
             />
           </div>
+=======
+           <div className="mb-3">
+             <label htmlFor="password" className="form-label">Contraseña</label>
+             <div className="input-group">
+               <input
+                 type={showPassword ? 'text' : 'password'}
+                 id="password"
+                 autoComplete="new-password"
+                 className="form-control"
+                 value={password}
+                 onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'password', value: e.target.value })}
+                 required
+                 minLength={8}
+               />
+               <button 
+                 className="btn btn-outline-secondary" 
+                 type="button" 
+                 onClick={() => setShowPassword(!showPassword)}
+               >
+                 {showPassword ? 'Ocultar' : 'Mostrar'}
+               </button>
+             </div>
+           </div>
+           <div className="mb-3">
+             <label htmlFor="confirmPassword" className="form-label">Confirmar Contraseña</label>
+             <div className="input-group">
+               <input
+                 type={showPassword ? 'text' : 'password'}
+                 id="confirmPassword"
+                 autoComplete="new-password"
+                 className="form-control"
+                 value={confirmPassword}
+                 onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'confirmPassword', value: e.target.value })}
+                 required
+                 minLength={8}
+               />
+               <button 
+                 className="btn btn-outline-secondary" 
+                 type="button" 
+                 onClick={() => setShowPassword(!showPassword)}
+               >
+                 {showPassword ? 'Ocultar' : 'Mostrar'}
+               </button>
+             </div>
+           </div>
+>>>>>>> develop
           <button type="submit" disabled={loading} className="btn btn-primary w-100 py-2 mt-3">
             {loading ? 'Registrando...' : 'Registrarse'}
           </button>

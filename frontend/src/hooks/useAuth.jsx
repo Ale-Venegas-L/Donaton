@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { auth as authService } from '../services/api'
 
@@ -70,6 +71,13 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext)
+=======
+import { use } from 'react'
+import { AuthContext } from './AuthContext'
+
+export const useAuth = () => {
+  const ctx = use(AuthContext)
+>>>>>>> develop
   if (!ctx) {
     throw new Error('useAuth debe usarse dentro de un AuthProvider')
   }

@@ -3,7 +3,11 @@ services:
     image: mysql:8.0
     container_name: paymentchain-mysql
     ports:
+<<<<<<< HEAD
       - "3306:3306"
+=======
+      - "3307:3306"
+>>>>>>> develop
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123}
     volumes:
@@ -71,7 +75,11 @@ services:
       context: .
       dockerfile: backend/businessdomain/donation/Dockerfile
     ports:
+<<<<<<< HEAD
       - '8082:8082'
+=======
+      - '9082:8082'
+>>>>>>> develop
     depends_on:
       eureka:
         condition: service_started

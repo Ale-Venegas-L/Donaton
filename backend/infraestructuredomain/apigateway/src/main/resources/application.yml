@@ -23,7 +23,11 @@ spring:
           predicates:
             - Path=/api/auth/**
           filters:
+<<<<<<< HEAD
             - StripPrefix=2
+=======
+            - StripPrefix=1
+>>>>>>> develop
         - id: campaign
           uri: lb://campaign
           predicates:

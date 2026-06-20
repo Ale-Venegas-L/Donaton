@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useEffect } from 'react';
 import { StatCard } from '../components/StatCard';
 import RecentDonations from '../components/RecentDonations';
@@ -7,6 +8,17 @@ function Home() {
   useEffect(() => {
     document.title = 'Dashboard - Donaton';
   }, []);
+=======
+import { useEffect } from 'react'
+import { StatCard } from '../components/StatCard'
+import RecentDonations from '../components/RecentDonations'
+import QuickActions from '../components/QuickActions'
+
+function Home() {
+  useEffect(() => {
+    document.title = 'Dashboard - Donaton'
+  }, [])
+>>>>>>> develop
   return (
     <div className="container py-4">
       <header className="text-center mb-4">
@@ -16,6 +28,7 @@ function Home() {
 
       <section className="row g-3 mb-4">
         <div className="col-md-3 col-sm-6">
+<<<<<<< HEAD
           <StatCard title="Campañas Activas" apiPath="/campaigns/active/count" icon="📢" color="#4b7bec" />
         </div>
         <div className="col-md-3 col-sm-6">
@@ -26,6 +39,18 @@ function Home() {
         </div>
         <div className="col-md-3 col-sm-6">
           <StatCard title="Voluntarios" apiPath="/volunteers/count" icon="🙋" color="#f7b731" />
+=======
+          <StatCard title="Campañas Activas" apiPath="/campaigns/active/count" icon="bi-megaphone" color="#4b7bec" />
+        </div>
+        <div className="col-md-3 col-sm-6">
+          <StatCard title="Total Donaciones" apiPath="/donation/count" icon="bi-heart-fill" color="#ed4b69" />
+        </div>
+        <div className="col-md-3 col-sm-6">
+          <StatCard title="Donadores" apiPath="/donation/donors/count" icon="bi-people-fill" color="#20bf6b" />
+        </div>
+        <div className="col-md-3 col-sm-6">
+          <StatCard title="Voluntarios" apiPath="/volunteers/count" icon="bi-person-raised-hand" color="#f7b731" />
+>>>>>>> develop
         </div>
       </section>
 
@@ -38,7 +63,14 @@ function Home() {
         </div>
       </div>
     </div>
+<<<<<<< HEAD
   );
 }
 
 export default Home;
+=======
+  )
+}
+
+export default Home
+>>>>>>> develop

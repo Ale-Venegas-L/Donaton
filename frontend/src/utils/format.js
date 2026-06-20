@@ -12,11 +12,21 @@ export function formatDateLong(dateStr) {
   })
 }
 
+<<<<<<< HEAD
 export function formatCurrency(amount) {
   return new Intl.NumberFormat('es-CL', {
     style: 'currency',
     currency: 'CLP'
   }).format(amount)
+=======
+const currencyFormatter = new Intl.NumberFormat('es-CL', {
+  style: 'currency',
+  currency: 'CLP'
+})
+
+export function formatCurrency(amount) {
+  return currencyFormatter.format(amount)
+>>>>>>> develop
 }
 
 export function formatDonationAmount(donation) {

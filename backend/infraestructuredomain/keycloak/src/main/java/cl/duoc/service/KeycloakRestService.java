@@ -120,8 +120,14 @@ public class KeycloakRestService {
             Map<String, Object> tokenMap = new ObjectMapper().readValue(tokenResponse, HashMap.class);
             String accessToken = (String) tokenMap.get("access_token");
 
+<<<<<<< HEAD
             String adminUsersUri = keycloakTokenUri.replace("/realms/Donaton/protocol/openid-connect/token", "")
                     .replace("/auth", "") + "/admin/realms/Donaton/users";
+=======
+            String adminBaseUri = keycloakTokenUri.replace("/realms/Donaton/protocol/openid-connect/token", "")
+                    .replace("/auth", "");
+            String adminUsersUri = adminBaseUri + "/admin/realms/Donaton/users";
+>>>>>>> develop
 
             Map<String, Object> user = new HashMap<>();
             user.put("username", username);
@@ -143,9 +149,61 @@ public class KeycloakRestService {
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(user, headers);
 
+<<<<<<< HEAD
             restTemplate.exchange(adminUsersUri, HttpMethod.POST, request, String.class);
+=======
+            ResponseEntity<String> response = restTemplate.exchange(adminUsersUri, HttpMethod.POST, request, String.class);
+
+            if (response.getStatusCode() == HttpStatus.CREATED) {
+                assignUserRole(accessToken, adminBaseUri, username);
+            }
+>>>>>>> develop
         } catch (Exception e) {
             throw new RuntimeException("Failed to register user: " + e.getMessage(), e);
         }
     }
+<<<<<<< HEAD
+=======
+
+    private void assignUserRole(String accessToken, String adminBaseUri, String username) {
+        try {
+            // 1. Get User ID
+            String usersUri = adminBaseUri + "/admin/realms/Donaton/users?username=" + username;
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + accessToken);
+            HttpEntity<String> userRequest = new HttpEntity<>(headers);
+            String usersResponse = restTemplate.exchange(usersUri, HttpMethod.GET, userRequest, String.class).getBody();
+            
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> users = new ObjectMapper().readValue(usersResponse, List.class);
+            if (users == null || users.isEmpty()) return;
+            String userId = (String) users.get(0).get("id");
+
+            // 2. Get Role ID for 'user'
+            String roleUri = adminBaseUri + "/admin/realms/Donaton/roles/user";
+            String roleResponse = restTemplate.exchange(roleUri, HttpMethod.GET, userRequest, String.class).getBody();
+            @SuppressWarnings("unchecked")
+            Map<String, Object> roleMap = new ObjectMapper().readValue(roleResponse, HashMap.class);
+            String roleId = (String) roleMap.get("id");
+
+            // 3. Assign Role
+            String mappingUri = adminBaseUri + "/admin/realms/Donaton/users/" + userId + "/role-mappings/realm";
+            Map<String, Object> roleAssignment = new HashMap<>();
+            roleAssignment.put("name", "user"); // Keycloak accepts role name or ID in some versions, but let's use role ID for precision
+            
+            // We send a list of role objects
+            Map<String, String> roleObj = new HashMap<>();
+            roleObj.put("id", roleId);
+            
+            HttpHeaders postHeaders = new HttpHeaders();
+            postHeaders.set("Authorization", "Bearer " + accessToken);
+            postHeaders.setContentType(MediaType.APPLICATION_JSON);
+            
+            HttpEntity<List<Map<String, String>>> postRequest = new HttpEntity<>(List.of(roleObj), postHeaders);
+            restTemplate.exchange(mappingUri, HttpMethod.POST, postRequest, String.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to assign role to user: " + e.getMessage(), e);
+        }
+    }
+>>>>>>> develop
 }
