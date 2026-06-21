@@ -17,10 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-<<<<<<< HEAD
-import java.util.stream.Collectors;
-=======
->>>>>>> develop
 
 @Service
 @Transactional
@@ -105,19 +101,10 @@ public class DonationService {
                 donation.setCampaign(campaignOpt.get());
             }
         }
-<<<<<<< HEAD
-        if (donation instanceof MonetaryDonation) {
-            MonetaryDonation md = (MonetaryDonation) donation;
-            if (request.getAmount() != null) md.setAmount(request.getAmount());
-            if (request.getCurrency() != null) md.setCurrency(request.getCurrency());
-        } else if (donation instanceof ObjectDonation) {
-            ObjectDonation od = (ObjectDonation) donation;
-=======
         if (donation instanceof MonetaryDonation md) {
             if (request.getAmount() != null) md.setAmount(request.getAmount());
             if (request.getCurrency() != null) md.setCurrency(request.getCurrency());
         } else if (donation instanceof ObjectDonation od) {
->>>>>>> develop
             if (request.getObjectName() != null) od.setObjectName(request.getObjectName());
             if (request.getCategory() != null) od.setCategory(request.getCategory());
             if (request.getEstimatedValue() != null) od.setEstimatedValue(request.getEstimatedValue());
@@ -139,42 +126,25 @@ public class DonationService {
 
     private Donation createDonationFromRequest(DonationRequest request, CampaignModel campaign) {
         DonationType type = DonationType.valueOf(request.getType().toUpperCase());
-<<<<<<< HEAD
-        switch (type) {
-            case MONETARY:
-                if (request.getAmount() == null || request.getCurrency() == null) {
-                    throw new IllegalArgumentException("Monetary donations require amount and currency");
-                }
-                return DonationFactory.createMonetaryDonation(
-=======
         return switch (type) {
             case MONETARY -> {
                 if (request.getAmount() == null || request.getCurrency() == null) {
                     throw new IllegalArgumentException("Monetary donations require amount and currency");
                 }
                 yield DonationFactory.createMonetaryDonation(
->>>>>>> develop
                     campaign,
                     request.getDonorName(),
                     request.getDescription(),
                     request.getAmount(),
                     request.getCurrency()
                 );
-<<<<<<< HEAD
-            case OBJECT:
-=======
             }
             case OBJECT -> {
->>>>>>> develop
                 if (request.getObjectName() == null || request.getCategory() == null ||
                         request.getEstimatedValue() == null || request.getQuantity() == null) {
                     throw new IllegalArgumentException("Object donations require objectName, category, estimatedValue, and quantity");
                 }
-<<<<<<< HEAD
-                return DonationFactory.createObjectDonation(
-=======
                 yield DonationFactory.createObjectDonation(
->>>>>>> develop
                     campaign,
                     request.getDonorName(),
                     request.getDescription(),
@@ -183,14 +153,8 @@ public class DonationService {
                     request.getEstimatedValue(),
                     request.getQuantity()
                 );
-<<<<<<< HEAD
-            default:
-                throw new IllegalArgumentException("Unsupported donation type: " + type);
-        }
-=======
             }
             default -> throw new IllegalArgumentException("Unsupported donation type: " + type);
         };
->>>>>>> develop
     }
 }
