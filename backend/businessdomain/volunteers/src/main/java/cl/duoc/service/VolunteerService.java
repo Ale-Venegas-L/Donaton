@@ -3,6 +3,7 @@ package cl.duoc.service;
 import cl.duoc.model.Volunteer;
 import cl.duoc.model.CampaignModel;
 import cl.duoc.repository.VolunteerRepository;
+import cl.duoc.repository.CampaignRepository;
 import cl.duoc.facade.CampaignFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,9 @@ public class VolunteerService {
     @Autowired
     private VolunteerRepository volunteerRepository;
     
+    @Autowired
+    private CampaignRepository campaignRepository;
+
     @Autowired
     private CampaignFacade campaignFacade;
 
@@ -114,13 +118,18 @@ public class VolunteerService {
 
         Volunteer volunteer = volunteerOpt.get();
         Optional<CampaignModel> campaignOpt = campaignFacade.getCampaignById(campaignId);
-        
-        if (campaignOpt.isPresent()) {
-            volunteer.getCampaigns().add(campaignOpt.get());
-            return volunteerRepository.save(volunteer);
+
+        if (campaignOpt.isEmpty()) {
+            throw new IllegalArgumentException("No se pudo obtener la información de la campaña");
         }
-        
-        throw new IllegalArgumentException("No se pudo obtener la información de la campaña");
+
+        CampaignModel remoteCampaign = campaignOpt.get();
+        Long campaignIdValue = remoteCampaign.getId();
+        CampaignModel reference = campaignRepository.findById(campaignIdValue)
+                .orElseGet(() -> campaignRepository.saveAndFlush(remoteCampaign));
+
+        volunteer.getCampaigns().add(reference);
+        return volunteerRepository.save(volunteer);
     }
 
     public Volunteer removeCampaignFromVolunteer(Long volunteerId, Long campaignId) {

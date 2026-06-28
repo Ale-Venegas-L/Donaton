@@ -1,9 +1,15 @@
 import { Link } from 'react-router'
 import { useAuth } from '../hooks/useAuth.jsx'
 
+function hasRole(user, requiredRole) {
+  if (!user?.roles?.length || !requiredRole) return false
+  const normalizedRequiredRole = requiredRole.toLowerCase()
+  return user.roles.some((role) => role?.toLowerCase() === normalizedRequiredRole)
+}
+
 export function QuickActions() {
   const { user } = useAuth()
-  const canViewVolunteers = user?.roles?.includes('VolunteerManager')
+  const canViewVolunteers = hasRole(user, 'admin')
   const actions = [
     { to: '/donations', label: 'Nueva Donación', icon: 'bi-heart-fill' },
     { to: '/campaigns', label: 'Crear Campaña', icon: 'bi-megaphone' },

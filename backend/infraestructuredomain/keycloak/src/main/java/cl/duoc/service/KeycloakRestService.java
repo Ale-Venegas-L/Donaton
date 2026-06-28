@@ -56,7 +56,9 @@ public class KeycloakRestService {
         map.add("client_secret",clientSecret);
         map.add("scope",scope);
 
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, new HttpHeaders());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
         return restTemplate.postForObject(keycloakTokenUri, request, String.class);
     }
 
@@ -70,7 +72,9 @@ public class KeycloakRestService {
         map.add("client_secret",clientSecret);
         map.add("refresh_token",refreshToken);
 
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, new HttpHeaders());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
         restTemplate.postForObject(keycloakLogout, request, String.class);
     }
 
@@ -81,7 +85,9 @@ public class KeycloakRestService {
         map.add("refresh_token",refreshToken);
         map.add("grant_type",grantTypeRefresh);
 
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, new HttpHeaders());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
         return restTemplate.postForObject(keycloakTokenUri, request, String.class);
     }
 
@@ -109,7 +115,9 @@ public class KeycloakRestService {
         map.add("password", adminPassword);
         map.add("grant_type", "password");
 
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, new HttpHeaders());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
         return restTemplate.postForObject(adminTokenUri, request, String.class);
     }
 

@@ -22,7 +22,12 @@ function parseUserFromToken(token) {
 export const AuthProvider = ({ children }) => {
   const [loading] = useState(false)
   const [user, setUser] = useState(() => {
-    const token = localStorage.getItem('access_token')
+    let token = null
+    try {
+      token = localStorage.getItem('access_token')
+    } catch {
+      token = null
+    }
     return token ? parseUserFromToken(token) : null
   })
  
@@ -31,14 +36,23 @@ export const AuthProvider = ({ children }) => {
     const response = await authService.login({ username, password })
     const data = response.data
     const token = data.access_token
-    localStorage.setItem('access_token', token)
-    localStorage.setItem('refresh_token', data.refresh_token)
+    try {
+      localStorage.setItem('access_token', token)
+      localStorage.setItem('refresh_token', data.refresh_token)
+    } catch {
+      console.warn('Unable to access localStorage for auth tokens')
+    }
     setUser(parseUserFromToken(token))
     return data
   }, [])
 
   const logout = useCallback(async () => {
-    const refreshToken = localStorage.getItem('refresh_token')
+    let refreshToken = null
+    try {
+      refreshToken = localStorage.getItem('refresh_token')
+    } catch {
+      refreshToken = null
+    }
     if (refreshToken) {
       try {
         await authService.logout(refreshToken)
@@ -46,8 +60,10 @@ export const AuthProvider = ({ children }) => {
         console.error('Logout error', e)
       }
     }
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
+    try {
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
+    } catch {}
     setUser(null)
   }, [])
 

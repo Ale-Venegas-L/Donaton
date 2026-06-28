@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -185,14 +186,14 @@ public class VolunteerController {
         @ApiResponse(responseCode = "400", description = "Datos inválidos")
     })
     @PostMapping("/{volunteerId}/campaigns")
-    public ResponseEntity<Volunteer> assignToCampaign(
+    public ResponseEntity<?> assignToCampaign(
             @Parameter(description = "ID del voluntario") @PathVariable Long volunteerId,
             @Valid @RequestBody CampaignAssignmentRequest request) {
         try {
             Volunteer updatedVolunteer = volunteerService.addCampaignToVolunteer(volunteerId, request.getCampaignId());
             return ResponseEntity.ok(updatedVolunteer);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 

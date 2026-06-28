@@ -4,8 +4,10 @@ import cl.duoc.model.CampaignModel;
 import cl.duoc.model.CampaignStatus;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
@@ -19,17 +21,17 @@ public class CampaignFacade {
 
     @CircuitBreaker(name = "campaignService", fallbackMethod = "getCampaignByIdFallback")
     public Optional<CampaignModel> getCampaignById(Long campaignId) {
-        try {
-            WebClient webClient = webClientBuilder.build();
-            CampaignModel campaign = webClient.get()
-                    .uri(CAMPAIGN_SERVICE_URL + "/{id}", campaignId)
-                    .retrieve()
-                    .bodyToMono(CampaignModel.class)
-                    .block();
-            return Optional.ofNullable(campaign);
-        } catch (Exception e) {
-            throw e;
-        }
+        WebClient webClient = webClientBuilder.build();
+        CampaignModel campaign = webClient.get()
+                .uri(CAMPAIGN_SERVICE_URL + "/{id}", campaignId)
+                .exchangeToMono(response -> {
+                    if (response.statusCode() == HttpStatus.NOT_FOUND) {
+                        return Mono.empty();
+                    }
+                    return response.bodyToMono(CampaignModel.class);
+                })
+                .block();
+        return Optional.ofNullable(campaign);
     }
 
     public Optional<CampaignModel> getCampaignByIdFallback(Long campaignId, Throwable ex) {

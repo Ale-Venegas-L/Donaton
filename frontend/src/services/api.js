@@ -41,8 +41,28 @@ export const auth = {
   register: (data) => api.post('/auth/register', data),
 }
 
+const safeStorage = {
+  getItem: (key) => {
+    try {
+      return localStorage.getItem(key)
+    } catch {
+      return null
+    }
+  },
+  setItem: (key, value) => {
+    try {
+      localStorage.setItem(key, value)
+    } catch {}
+  },
+  removeItem: (key) => {
+    try {
+      localStorage.removeItem(key)
+    } catch {}
+  }
+}
+
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token')
+  const token = safeStorage.getItem('access_token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -73,8 +93,8 @@ api.interceptors.response.use(
     }
 
     if (originalRequest.url?.includes('/auth/refresh')) {
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('refresh_token')
+      safeStorage.removeItem('access_token')
+      safeStorage.removeItem('refresh_token')
       window.location.href = '/login'
       return Promise.reject(error)
     }
@@ -91,11 +111,11 @@ api.interceptors.response.use(
     originalRequest._retry = true
     isRefreshing = true
 
-    const refreshToken = localStorage.getItem('refresh_token')
+    const refreshToken = safeStorage.getItem('refresh_token')
     if (!refreshToken) {
       isRefreshing = false
       processQueue(new Error('No refresh token'))
-      localStorage.removeItem('access_token')
+      safeStorage.removeItem('access_token')
       window.location.href = '/login'
       return Promise.reject(error)
     }
@@ -103,8 +123,8 @@ api.interceptors.response.use(
     try {
       const response = await auth.refresh(refreshToken)
       const data = response.data
-      localStorage.setItem('access_token', data.access_token)
-      localStorage.setItem('refresh_token', data.refresh_token)
+      safeStorage.setItem('access_token', data.access_token)
+      safeStorage.setItem('refresh_token', data.refresh_token)
       isRefreshing = false
       processQueue(null, data.access_token)
       originalRequest.headers.Authorization = `Bearer ${data.access_token}`
@@ -112,8 +132,8 @@ api.interceptors.response.use(
     } catch (refreshError) {
       isRefreshing = false
       processQueue(refreshError)
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('refresh_token')
+      safeStorage.removeItem('access_token')
+      safeStorage.removeItem('refresh_token')
       window.location.href = '/login'
       return Promise.reject(refreshError)
     }

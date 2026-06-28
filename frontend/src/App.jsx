@@ -24,11 +24,17 @@ function ProtectedRoute({ children }) {
   return children
 }
 
+function hasRole(user, requiredRole) {
+  if (!user?.roles?.length || !requiredRole) return false
+  const normalizedRequiredRole = requiredRole.toLowerCase()
+  return user.roles.some((role) => role?.toLowerCase() === normalizedRequiredRole)
+}
+
 function ProtectedRouteByRole({ children, requiredRole }) {
   const { user, loading } = useAuth()
   if (loading) return <div className="text-center py-4 text-muted">Cargando...</div>
   if (!user) return <Navigate to="/login" replace />
-  if (!user.roles?.includes(requiredRole)) return <Navigate to="/" replace />
+  if (!hasRole(user, requiredRole)) return <Navigate to="/" replace />
   return children
 }
 
@@ -41,7 +47,7 @@ function GuestRoute({ children }) {
 
 function Navbar() {
   const { user, logout } = useAuth()
-  const canViewVolunteers = user?.roles?.includes('VolunteerManager')
+  const canViewVolunteers = hasRole(user, 'admin')
   return (
     <nav className="navbar navbar-expand navbar-dark">
       <div className="container">
@@ -92,7 +98,7 @@ function App() {
             </ProtectedRoute>
           } />
            <Route path="/volunteers" element={
-             <ProtectedRouteByRole requiredRole="VolunteerManager">
+             <ProtectedRouteByRole requiredRole="admin">
                <Volunteers />
              </ProtectedRouteByRole>
            } />
